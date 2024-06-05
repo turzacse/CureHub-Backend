@@ -108,6 +108,8 @@ async function run() {
       res.send(result);
     })
 
+    // category 
+
     app.get('/category', async (req, res) => {
       console.log(req.body);
       console.log('owener info: ', req.user);
@@ -140,11 +142,11 @@ async function run() {
     //     .send({ success: true });
     // })
 
-    app.post('/logout', async (req, res) => {
-      const logged = req.body;
-      console.log('logging out', logged);
-      res.clearCookie('token', { maxAge: 0 }).send({ success: true })
-    })
+    // app.post('/logout', async (req, res) => {
+    //   const logged = req.body;
+    //   console.log('logging out', logged);
+    //   res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+    // })
 
 
     //user related api
