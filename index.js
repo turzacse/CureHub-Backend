@@ -33,26 +33,26 @@ const client = new MongoClient(uri, {
 });
 
 //my middlewares 
-const logger = (req, res, next) => {
-  console.log('loginfo : ', req.method, req.url);
-  next();
-}
+// const logger = (req, res, next) => {
+//   console.log('loginfo : ', req.method, req.url);
+//   next();
+// }
 
-const verifyToken = (req, res, next) => {
-  const token = req?.cookies?.token;
-  // console.log('token in the middleware', token);
-  // next();
-  if (!token) {
-    return res.status(401).send({ message: 'unauthorized access' })
-  }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).send({ message: 'unauthorized access' })
-    }
-    req.user = decoded;
-    next();
-  })
-}
+// const verifyToken = (req, res, next) => {
+//   const token = req?.cookies?.token;
+//   // console.log('token in the middleware', token);
+//   // next();
+//   if (!token) {
+//     return res.status(401).send({ message: 'unauthorized access' })
+//   }
+// //   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+// //     if (err) {
+// //       return res.status(401).send({ message: 'unauthorized access' })
+// //     }
+// //     req.user = decoded;
+// //     next();
+// //   })
+// // }
 
 async function run() {
   try {
@@ -127,18 +127,18 @@ async function run() {
 
 
 
-    app.post('/jwt', async (req, res) => {
-      const logged = req.body;
-      console.log('user for token', logged);
-      const token = jwt.sign(logged, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    // app.post('/jwt', async (req, res) => {
+    //   const logged = req.body;
+    //   console.log('user for token', logged);
+    //   const token = jwt.sign(logged, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none'
-      })
-        .send({ success: true });
-    })
+    //   res.cookie('token', token, {
+    //     httpOnly: true,
+    //     secure: true,
+    //     sameSite: 'none'
+    //   })
+    //     .send({ success: true });
+    // })
 
     app.post('/logout', async (req, res) => {
       const logged = req.body;
@@ -171,49 +171,49 @@ async function run() {
     //   res.send(result);
     // })
 
-    app.get('/allfoods', async (req, res) => {
-      const food = foodCollection.find();
-      const result = await food.toArray();
-      res.send(result);
-    })
+    // app.get('/allfoods', async (req, res) => {
+    //   const food = foodCollection.find();
+    //   const result = await food.toArray();
+    //   res.send(result);
+    // })
 
-    app.post('/allfoods', async (req, res) => {
-      const food = req.body;
-      console.log(food);
-      const result = await foodCollection.insertOne(food);
-      res.send(result);
-    })
+    // app.post('/allfoods', async (req, res) => {
+    //   const food = req.body;
+    //   console.log(food);
+    //   const result = await foodCollection.insertOne(food);
+    //   res.send(result);
+    // })
 
-    app.put('/allfoods/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) }
-      const options = { upset: true };
-      const updatedProduct = req.body;
-      const food = {
-        $set: {
-          foodName: updatedProduct.foodName,
-          foodCategory: updatedProduct.foodCategory,
-          quantity: updatedProduct.quantity,
-          origin: updatedProduct.origin,
-          price: updatedProduct.price,
-          descriptions: updatedProduct.descriptions,
-        }
-      }
-      const result = await foodCollection.updateOne(filter, food, options);
-      res.send(result);
-    })
+    // app.put('/allfoods/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) }
+    //   const options = { upset: true };
+    //   const updatedProduct = req.body;
+    //   const food = {
+    //     $set: {
+    //       foodName: updatedProduct.foodName,
+    //       foodCategory: updatedProduct.foodCategory,
+    //       quantity: updatedProduct.quantity,
+    //       origin: updatedProduct.origin,
+    //       price: updatedProduct.price,
+    //       descriptions: updatedProduct.descriptions,
+    //     }
+    //   }
+    //   const result = await foodCollection.updateOne(filter, food, options);
+    //   res.send(result);
+    // })
 
 
 
-    app.get('/topfoods', async (req, res) => {
-      const topFood = await foodCollection
-        .find()
-        .sort({ ordersCount: -1 })
-        .limit(6)
-        .toArray();
+    // app.get('/topfoods', async (req, res) => {
+    //   const topFood = await foodCollection
+    //     .find()
+    //     .sort({ ordersCount: -1 })
+    //     .limit(6)
+    //     .toArray();
 
-      res.send(topFood);
-    })
+    //   res.send(topFood);
+    // })
 
 
     // Send a ping to confirm a successful connection
