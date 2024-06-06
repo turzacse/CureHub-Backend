@@ -60,13 +60,26 @@ async function run() {
     //await client.connect();
 
     const userCollection = client.db('curehub').collection('users');
-    // const foodCollection = client.db('curehub').collection('allfoods');
-
     const medicineCollection = client.db('curehub').collection('medicines');
     const adsCollection = client.db('curehub').collection('ads');
     const categoryCollection = client.db('curehub').collection('category');
+    const cartCollection = client.db('curehub').collection('cart');
 
-    //order related API
+    // user related api 
+    app.get('/users', async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    })
+
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
+
+    
+    //medicine related API
     app.get('/medicine', async (req, res) => {
       console.log(req.body);
       console.log('owener info: ', req.user);
@@ -127,6 +140,20 @@ async function run() {
     })
 
 
+    // cart API 
+    app.get('/cart', async (req, res) => {
+      const carts = await cartCollection.find().toArray();
+      res.send(carts);
+    })
+
+    app.post('/carts', async (req, res) => {
+      const carts = req.body;
+      console.log(carts);
+      const result = await cartCollection.insertOne(carts);
+      res.send(result);
+    })
+
+
 
 
     // app.post('/jwt', async (req, res) => {
@@ -150,17 +177,7 @@ async function run() {
 
 
     //user related api
-    app.get('/users', async (req, res) => {
-      const users = await userCollection.find().toArray();
-      res.send(users);
-    })
 
-    app.post('/users', async (req, res) => {
-      const user = req.body;
-      console.log(user);
-      const result = await userCollection.insertOne(user);
-      res.send(result);
-    })
 
     //food related API
     // app.get('/foods', async(req,res) =>{
