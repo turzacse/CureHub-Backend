@@ -64,6 +64,7 @@ async function run() {
     const adsCollection = client.db('curehub').collection('ads');
     const categoryCollection = client.db('curehub').collection('category');
     const cartCollection = client.db('curehub').collection('cart');
+    const queriesCollection = client.db('curehub').collection('queries');
 
     // user related api 
     app.get('/users', async (req, res) => {
@@ -150,6 +151,19 @@ async function run() {
       const carts = req.body;
       console.log(carts);
       const result = await cartCollection.insertOne(carts);
+      res.send(result);
+    })
+
+    // Queries API 
+    app.get('/queries', async (req, res) => {
+      const queries = await queriesCollection.find().toArray();
+      res.send(queries);
+    })
+
+    app.post('/queries', async (req, res) => {
+      const queries = req.body;
+      console.log(queries);
+      const result = await queriesCollection.insertOne(queries);
       res.send(result);
     })
 
