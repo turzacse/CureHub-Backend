@@ -168,26 +168,28 @@ async function run() {
     })
 
     // Update Query API 
-    app.put('/queries/:id', async (req, res) => {
-      const queryId = req.params.id;
-      const queryUpdate = req.body;
+    // Update a query
+app.put('/queries/:id', async (req, res) => {
+  try {
+    const queryId = req.params.id;
+    const queryUpdate = req.body;
 
-      try {
-        const result = await queriesCollection.updateOne(
-          { _id: ObjectId(queryId) }, // Assuming you're using MongoDB ObjectId
-          { $set: { response: queryUpdate.response, answered: true } } // Assuming you have fields like 'response' and 'answered'
-        );
+    const result = await queriesCollection.updateOne(
+      { _id: ObjectId(queryId) },
+      { $set: { response: queryUpdate.response, answered: true } }
+    );
 
-        if (result.modifiedCount === 1) {
-          res.send({ message: "Query updated successfully" });
-        } else {
-          res.status(404).send({ error: "Query not found" });
-        }
-      } catch (error) {
-        console.error("Error updating query:", error);
-        res.status(500).send({ error: "Internal server error" });
-      }
-    });
+    if (result.modifiedCount === 1) {
+      res.send({ message: 'Query updated successfully' });
+    } else {
+      res.status(404).send({ error: 'Query not found' });
+    }
+  } catch (error) {
+    console.error('Error updating query:', error);
+    res.status(500).send({ error: 'Internal server error' });
+  }
+});
+
 
 
 
