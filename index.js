@@ -65,6 +65,7 @@ async function run() {
     const categoryCollection = client.db('curehub').collection('category');
     const cartCollection = client.db('curehub').collection('cart');
     const queriesCollection = client.db('curehub').collection('queries');
+    const appoinmentCollection = client.db('curehub').collection('appoinment');
 
     // user related api 
     app.get('/users', async (req, res) => {
@@ -169,30 +170,40 @@ async function run() {
 
     // Update Query API 
     // Update a query
-app.put('/queries/:id', async (req, res) => {
-  try {
-    const queryId = req.params.id;
-    const queryUpdate = req.body;
+    app.put('/queries/:id', async (req, res) => {
+      try {
+        const queryId = req.params.id;
+        const queryUpdate = req.body;
 
-    const result = await queriesCollection.updateOne(
-      { _id: ObjectId(queryId) },
-      { $set: { response: queryUpdate.response, answered: true } }
-    );
+        const result = await queriesCollection.updateOne(
+          { _id: ObjectId(queryId) },
+          { $set: { response: queryUpdate.response, answered: true } }
+        );
 
-    if (result.modifiedCount === 1) {
-      res.send({ message: 'Query updated successfully' });
-    } else {
-      res.status(404).send({ error: 'Query not found' });
-    }
-  } catch (error) {
-    console.error('Error updating query:', error);
-    res.status(500).send({ error: 'Internal server error' });
-  }
-});
-
-
+        if (result.modifiedCount === 1) {
+          res.send({ message: 'Query updated successfully' });
+        } else {
+          res.status(404).send({ error: 'Query not found' });
+        }
+      } catch (error) {
+        console.error('Error updating query:', error);
+        res.status(500).send({ error: 'Internal server error' });
+      }
+    });
 
 
+    // Appoinment API 
+    app.get('/appoinment', async (req, res) => {
+      const appoinment = await appoinmentCollection.find().toArray();
+      res.send(appoinment);
+    })
+
+    app.post('/appoinment', async (req, res) => {
+      const appoinment = req.body;
+      console.log(appoinment);
+      const result = await appoinmentCollection.insertOne(appoinment);
+      res.send(result);
+    })
 
 
     // app.post('/jwt', async (req, res) => {
