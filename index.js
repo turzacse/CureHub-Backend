@@ -73,23 +73,21 @@ async function run() {
 
     // stripe
     app.post('/create-payment-intent', async (req, res) => {
-      const { amount } = req.body;
-    
-      try {
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount, // amount in cents
-          currency: 'usd',
-          payment_method_types: ['card'],
-        });
-    
-        res.send({
-          clientSecret: paymentIntent.client_secret,
-        });
-      } catch (error) {
-        console.error('Error creating payment intent:', error);
-        res.status(500).send({ error: 'Internal server error' });
-      }
+  const { amount } = req.body;
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'usd',
     });
+
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
     
     // user related api 
     app.get('/users', async (req, res) => {
