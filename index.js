@@ -6,6 +6,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 5000;
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_51OMCncJNucR5rk9lcKrEYph53hR2ke2jAt8BuN7BnvpKv2MTU0cqZ957ofkemofDZTkdHS8nIKeLc214qKwXH5B20080a2YfA1');
+
 
 //middleware
 // app.use(cors({
@@ -68,6 +70,27 @@ async function run() {
     const appoinmentCollection = client.db('curehub').collection('appoinment');
     const doctorsCollection = client.db('curehub').collection('doctor');
 
+
+    // stripe
+    app.post('/create-payment-intent', async (req, res) => {
+      const { amount } = req.body;
+    
+      try {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount, // amount in cents
+          currency: 'usd',
+          payment_method_types: ['card'],
+        });
+    
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        });
+      } catch (error) {
+        console.error('Error creating payment intent:', error);
+        res.status(500).send({ error: 'Internal server error' });
+      }
+    });
+    
     // user related api 
     app.get('/users', async (req, res) => {
       const users = await userCollection.find().toArray();
