@@ -6,7 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 5000;
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_51OMCncJNucR5rk9lcKrEYph53hR2ke2jAt8BuN7BnvpKv2MTU0cqZ957ofkemofDZTkdHS8nIKeLc214qKwXH5B20080a2YfA1');
+// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_51OMCncJNucR5rk9lcKrEYph53hR2ke2jAt8BuN7BnvpKv2MTU0cqZ957ofkemofDZTkdHS8nIKeLc214qKwXH5B20080a2YfA1');
 
 
 //middleware
@@ -72,22 +72,22 @@ async function run() {
 
 
     // stripe
-    app.post('/create-payment-intent', async (req, res) => {
-  const { amount } = req.body;
+//     app.post('/create-payment-intent', async (req, res) => {
+//   const { amount } = req.body;
 
-  try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: 'usd',
-    });
+//   try {
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount,
+//       currency: 'usd',
+//     });
 
-    res.send({
-      clientSecret: paymentIntent.client_secret,
-    });
-  } catch (error) {
-    res.status(500).send({ error: error.message });
-  }
-});
+//     res.send({
+//       clientSecret: paymentIntent.client_secret,
+//     });
+//   } catch (error) {
+//     res.status(500).send({ error: error.message });
+//   }
+// });
     
     // user related api 
     app.get('/users', async (req, res) => {
