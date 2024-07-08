@@ -69,6 +69,7 @@ async function run() {
     const queriesCollection = client.db('curehub').collection('queries');
     const appoinmentCollection = client.db('curehub').collection('appoinment');
     const doctorsCollection = client.db('curehub').collection('doctor');
+    const telemedicineCollection = client.db('curehub').collection('telemedicine');
 
 
     // stripe
@@ -237,6 +238,19 @@ async function run() {
       const appoinment = req.body;
       console.log(appoinment);
       const result = await appoinmentCollection.insertOne(appoinment);
+      res.send(result);
+    })
+
+    // telemedicine API 
+    app.get('/telemedicine-appoinment', async (req, res) => {
+      const telemedicine = await telemedicineCollection.find().toArray();
+      res.send(telemedicine);
+    })
+
+    app.post('/telemedicine-appoinment', async (req, res) => {
+      const telemedicine = req.body;
+      console.log(telemedicine);
+      const result = await telemedicineCollection.insertOne(telemedicine);
       res.send(result);
     })
 
