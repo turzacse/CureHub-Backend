@@ -253,6 +253,16 @@ async function run() {
       const result = await telemedicineCollection.insertOne(telemedicine);
       res.send(result);
     })
+    app.delete('/telemedicine-appointment/:id', async (req, res) => {
+      const id = req.params.id;
+      const result = await telemedicineCollection.deleteOne({ _id: ObjectId(id) });
+      
+      if (result.deletedCount === 1) {
+        res.status(200).json({ message: 'Telemedicine appointment deleted successfully' });
+      } else {
+        res.status(404).json({ message: 'Telemedicine appointment not found' });
+      }
+    });
 
 
     // app.post('/jwt', async (req, res) => {
