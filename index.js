@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 // for video calling 
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ server });
+// const WebSocket = require('ws');
+// const wss = new WebSocket.Server({ server });
 // end video 
 
 require('dotenv').config();
@@ -100,36 +100,36 @@ async function run() {
 
 
     // WebSocket connection for signaling
-    wss.on('connection', (ws) => {
-      ws.on('message', (message) => {
-        const data = JSON.parse(message);
-        switch (data.type) {
-          case 'join':
-            ws.room = data.room;
-            break;
-          case 'signal':
-            wss.clients.forEach((client) => {
-              if (client !== ws && client.room === ws.room && client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(data));
-              }
-            });
-            break;
-        }
-      });
-    });
+    // wss.on('connection', (ws) => {
+    //   ws.on('message', (message) => {
+    //     const data = JSON.parse(message);
+    //     switch (data.type) {
+    //       case 'join':
+    //         ws.room = data.room;
+    //         break;
+    //       case 'signal':
+    //         wss.clients.forEach((client) => {
+    //           if (client !== ws && client.room === ws.room && client.readyState === WebSocket.OPEN) {
+    //             client.send(JSON.stringify(data));
+    //           }
+    //         });
+    //         break;
+    //     }
+    //   });
+    // });
 
     // Optional endpoints for call management
-    app.post('/create-call', async (req, res) => {
-      const callData = req.body;
-      const result = await callCollection.insertOne(callData);
-      res.send(result);
-    });
+    // app.post('/create-call', async (req, res) => {
+    //   const callData = req.body;
+    //   const result = await callCollection.insertOne(callData);
+    //   res.send(result);
+    // });
 
-    app.get('/join-call/:id', async (req, res) => {
-      const id = req.params.id;
-      const call = await callCollection.findOne({ _id: new ObjectId(id) });
-      res.send(call);
-    });
+    // app.get('/join-call/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const call = await callCollection.findOne({ _id: new ObjectId(id) });
+    //   res.send(call);
+    // });
 
 
 
