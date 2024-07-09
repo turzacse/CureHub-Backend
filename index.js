@@ -1,5 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+// for video calling 
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ server });
+// end video 
+
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -71,25 +76,64 @@ async function run() {
     const doctorsCollection = client.db('curehub').collection('doctor');
     const telemedicineCollection = client.db('curehub').collection('telemedicine');
 
+    //  a new collection for calls 
+    const callCollection = client.db('curehub').collection('calls');
+
 
     // stripe
-//     app.post('/create-payment-intent', async (req, res) => {
-//   const { amount } = req.body;
+    //     app.post('/create-payment-intent', async (req, res) => {
+    //   const { amount } = req.body;
 
-//   try {
-//     const paymentIntent = await stripe.paymentIntents.create({
-//       amount,
-//       currency: 'usd',
-//     });
+    //   try {
+    //     const paymentIntent = await stripe.paymentIntents.create({
+    //       amount,
+    //       currency: 'usd',
+    //     });
 
-//     res.send({
-//       clientSecret: paymentIntent.client_secret,
-//     });
-//   } catch (error) {
-//     res.status(500).send({ error: error.message });
-//   }
-// });
-    
+    //     res.send({
+    //       clientSecret: paymentIntent.client_secret,
+    //     });
+    //   } catch (error) {
+    //     res.status(500).send({ error: error.message });
+    //   }
+    // });
+
+
+    // WebSocket connection for signaling
+    wss.on('connection', (ws) => {
+      ws.on('message', (message) => {
+        const data = JSON.parse(message);
+        switch (data.type) {
+          case 'join':
+            ws.room = data.room;
+            break;
+          case 'signal':
+            wss.clients.forEach((client) => {
+              if (client !== ws && client.room === ws.room && client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(data));
+              }
+            });
+            break;
+        }
+      });
+    });
+
+    // Optional endpoints for call management
+    app.post('/create-call', async (req, res) => {
+      const callData = req.body;
+      const result = await callCollection.insertOne(callData);
+      res.send(result);
+    });
+
+    app.get('/join-call/:id', async (req, res) => {
+      const id = req.params.id;
+      const call = await callCollection.findOne({ _id: new ObjectId(id) });
+      res.send(call);
+    });
+
+
+
+
     // user related api 
     app.get('/users', async (req, res) => {
       const users = await userCollection.find().toArray();
@@ -256,7 +300,7 @@ async function run() {
     app.delete('/telemedicine-appointment/:id', async (req, res) => {
       const id = req.params.id;
       const result = await telemedicineCollection.deleteOne({ _id: ObjectId(id) });
-      
+
       if (result.deletedCount === 1) {
         res.status(200).json({ message: 'Telemedicine appointment deleted successfully' });
       } else {
@@ -282,34 +326,6 @@ async function run() {
     //   const logged = req.body;
     //   console.log('logging out', logged);
     //   res.clearCookie('token', { maxAge: 0 }).send({ success: true })
-    // })
-
-
-    //user related api
-
-
-    //food related API
-    // app.get('/foods', async(req,res) =>{
-    //   const foods = await foodCollection.find().toArray();
-    //   res.send(foods);
-    // })
-    // app.get('/allfoods', async(req, res) =>{
-    //   const cursor = foodCollection.find();
-    //   const result = await cursor.toArray();
-    //   res.send(result);
-    // })
-
-    // app.get('/allfoods', async (req, res) => {
-    //   const food = foodCollection.find();
-    //   const result = await food.toArray();
-    //   res.send(result);
-    // })
-
-    // app.post('/allfoods', async (req, res) => {
-    //   const food = req.body;
-    //   console.log(food);
-    //   const result = await foodCollection.insertOne(food);
-    //   res.send(result);
     // })
 
     // app.put('/allfoods/:id', async (req, res) => {
