@@ -269,6 +269,20 @@ async function run() {
       res.send(telemedicine);
     })
 
+    app.get('/telemedicine-appoinment/:id', async (req, res) => {
+      const id = req.params.id;
+      try {
+        const telemedicineAppointments = await telemedicineCollection.find({ _id: new ObjectId(id) }).toArray();
+        if (telemedicineAppointments.length > 0) {
+          res.send(telemedicineAppointments);
+        } else {
+          res.status(404).send({ message: 'Telemedicine appointments not found' });
+        }
+      } catch (error) {
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+
     app.post('/telemedicine-appoinment', async (req, res) => {
       const telemedicine = req.body;
       console.log(telemedicine);
