@@ -283,6 +283,21 @@ async function run() {
       }
     });
 
+    app.get('/telemedicine-appointment/:cureHubUser', async (req, res) => {
+      const cureHubUser = req.params.cureHubUser;
+      try {
+        const telemedicineAppointments = await telemedicineCollection.find({ cureHubUser: cureHubUser }).toArray();
+        if (telemedicineAppointments.length > 0) {
+          res.send(telemedicineAppointments);
+        } else {
+          res.status(404).send({ message: 'Telemedicine appointments not found' });
+        }
+      } catch (error) {
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+    
+
     app.post('/telemedicine-appoinment', async (req, res) => {
       const telemedicine = req.body;
       console.log(telemedicine);
