@@ -99,6 +99,20 @@ async function run() {
       res.send(users);
     })
 
+    app.get('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      try {
+        const user = await userCollection.findOne({ email: email });
+        if (user) {
+          res.send(user);
+        } else {
+          res.status(404).send({ message: 'User not found' });
+        }
+      } catch (error) {
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+
     app.post('/users', async (req, res) => {
       const user = req.body;
       console.log(user);
