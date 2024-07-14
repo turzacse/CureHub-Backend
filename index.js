@@ -283,19 +283,38 @@ async function run() {
       }
     });
 
-    app.get('/telemedicine-appointment/:cureHubUser', async (req, res) => {
+    // app.get('/telemedicine-appointment/:cureHubUser', async (req, res) => {
+    //   const cureHubUser = req.params.cureHubUser;
+    //   try {
+    //     const telemedicineAppointments = await telemedicineCollection.find({ cureHubUser: cureHubUser }).toArray();
+    //     if (telemedicineAppointments.length > 0) {
+    //       res.send(telemedicineAppointments);
+    //     } else {
+    //       res.status(404).send({ message: 'Telemedicine appointments not found' });
+    //     }
+    //   } catch (error) {
+    //     res.status(500).send({ message: 'Internal Server Error' });
+    //   }
+    // });
+    app.get('/telemedicine-appoinment/:cureHubUser', async (req, res) => {
       const cureHubUser = req.params.cureHubUser;
+      console.log(`Received request for cureHubUser: ${cureHubUser}`);
+    
       try {
         const telemedicineAppointments = await telemedicineCollection.find({ cureHubUser: cureHubUser }).toArray();
         if (telemedicineAppointments.length > 0) {
+          console.log(`Found ${telemedicineAppointments.length} appointments`);
           res.send(telemedicineAppointments);
         } else {
+          console.log('No appointments found');
           res.status(404).send({ message: 'Telemedicine appointments not found' });
         }
       } catch (error) {
+        console.error('Error fetching telemedicine appointments:', error);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
+    
     
 
     app.post('/telemedicine-appoinment', async (req, res) => {
