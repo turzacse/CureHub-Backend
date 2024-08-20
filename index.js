@@ -144,17 +144,17 @@ async function run() {
     });
 
 
-    app.get('/reports', async (req, res) => {
-      try {
-          // Find all reports in the database
-          const reports = await reportsCollection.find({}).toArray();
+  //   app.get('/reports', async (req, res) => {
+  //     try {
+  //         // Find all reports in the database
+  //         const reports = await reportsCollection.find({}).toArray();
   
-          res.send({ message: 'Reports retrieved successfully', reports });
-      } catch (error) {
-          console.error('Error retrieving reports:', error);
-          res.status(500).send({ message: 'Failed to retrieve reports' });
-      }
-  });
+  //         res.send({ message: 'Reports retrieved successfully', reports });
+  //     } catch (error) {
+  //         console.error('Error retrieving reports:', error);
+  //         res.status(500).send({ message: 'Failed to retrieve reports' });
+  //     }
+  // });
 
 //   app.get('/report/:id', async (req, res) => {
 //     const { id } = req.params;
