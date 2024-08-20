@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
+const { Configuration, OpenAIApi } = require('openai');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -21,6 +23,12 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.json());
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bnzewy6.mongodb.net/?retryWrites=true&w=majority`;
@@ -70,6 +78,8 @@ async function run() {
     const appoinmentCollection = client.db('curehub').collection('appoinment');
     const doctorsCollection = client.db('curehub').collection('doctor');
     const telemedicineCollection = client.db('curehub').collection('telemedicine');
+    const reportsCollection = client.db('curehub').collection('reports');
+
 
     //  a new collection for calls 
     const callCollection = client.db('curehub').collection('calls');
@@ -92,6 +102,47 @@ async function run() {
     //     res.status(500).send({ error: error.message });
     //   }
     // });
+
+    // chatGPT processing........
+
+    app.post('/process-response', async (req, res) => {
+      const { userId, responses } = req.body; // Example data structure
+    
+      if (!userId || !responses) {
+        return res.status(400).send({ message: 'Invalid data' });
+      }
+    
+      try {
+        // Create a prompt for ChatGPT using the responses
+        const prompt = `Generate a comprehensive report based on the following responses:\n\n${responses.join('\n')}`;
+    
+        // Generate the report using OpenAI API
+        const completion = await openai.createChatCompletion({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: prompt }
+          ],
+          max_tokens: 1500 // Adjust based on the expected length of the report
+        });
+    
+        const report = completion.data.choices[0].message.content.trim();
+    
+        // Save the report and responses to the reports collection
+        const result = await reportsCollection.insertOne({
+          userId,
+          responses,
+          report,
+          createdAt: new Date()
+        });
+    
+        res.send({ message: 'Report generated and saved successfully', reportId: result.insertedId, report });
+      } catch (error) {
+        console.error('Error generating or saving report:', error);
+        res.status(500).send({ message: 'Failed to generate or save report' });
+      }
+    });
+    
 
     // user related api 
     app.get('/users', async (req, res) => {
@@ -301,9 +352,9 @@ async function run() {
       console.log(`Received request for cureHubUser: ${cureHubUser}`);
     
       try {
-        const telemedicineAppointments = await telemedicineCollection.find({ cureHubUser: cureHubUser }).toArray();
+        const telemedicineAppointments = await telemedicineCollection?.find({ cureHubUser: cureHubUser })?.toArray();
         if (telemedicineAppointments.length > 0) {
-          console.log(`Found ${telemedicineAppointments.length} appointments`);
+          console.log(`Found ${telemedicineAppointments?.length} appointments`);
           res.send(telemedicineAppointments);
         } else {
           console.log('No appointments found');
