@@ -142,6 +142,42 @@ async function run() {
         res.status(500).send({ message: 'Failed to generate or save report' });
       }
     });
+
+
+    app.get('/reports', async (req, res) => {
+      try {
+          // Find all reports in the database
+          const reports = await reportsCollection.find({}).toArray();
+  
+          res.send({ message: 'Reports retrieved successfully', reports });
+      } catch (error) {
+          console.error('Error retrieving reports:', error);
+          res.status(500).send({ message: 'Failed to retrieve reports' });
+      }
+  });
+
+  app.get('/report/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).send({ message: 'Report ID is required' });
+    }
+
+    try {
+        // Find the report in the database by ID
+        const report = await reportsCollection.findOne({ _id: new MongoClient.ObjectId(id) });
+
+        if (!report) {
+            return res.status(404).send({ message: 'Report not found' });
+        }
+
+        res.send({ message: 'Report retrieved successfully', report });
+    } catch (error) {
+        console.error('Error retrieving report:', error);
+        res.status(500).send({ message: 'Failed to retrieve report' });
+    }
+});
+
     
 
     // user related api 
