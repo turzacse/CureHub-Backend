@@ -360,6 +360,39 @@ async function run() {
         res.send(appointments);
     });
 
+    // update Appointment 
+    app.put('/appoinment/update/:id', async (req, res) => {
+      const id = req.params.id;
+      const updateData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+          $set: updateData,
+      };
+  
+      const result = await appoinmentCollection.updateOne(query, updateDoc);
+  
+      if (result.matchedCount === 1) {
+          res.send({ message: 'Appointment updated successfully.' });
+      } else {
+          res.status(404).send({ message: 'Appointment not found.' });
+      }
+  });
+  
+    
+    // delete appointment 
+    app.delete('/appoinment/delete/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await appoinmentCollection.deleteOne(query);
+  
+      if (result.deletedCount === 1) {
+          res.send({ message: 'Appointment deleted successfully.' });
+      } else {
+          res.status(404).send({ message: 'Appointment not found.' });
+      }
+  });
+  
+
     // telemedicine API 
     app.get('/telemedicine-appoinment', async (req, res) => {
       const telemedicine = await telemedicineCollection.find().toArray();
