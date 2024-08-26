@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-const { OpenAIApi, Configuration } = require('openai');
+// const { OpenAIApi, Configuration } = require('openai');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -25,10 +25,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-// const chatGpt = new Configuration({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-// const openai = new OpenAIApi(chatGpt);
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bnzewy6.mongodb.net/?retryWrites=true&w=majority`;
@@ -105,7 +102,7 @@ async function run() {
 
     // chatGPT processing........
 
-    app.post('/process-response', async (req, res) => {
+    app.post('/analysis-report', async (req, res) => {
       const { userId, responses } = req.body; // Example data structure
     
       if (!userId || !responses) {
@@ -349,6 +346,19 @@ async function run() {
       const result = await appoinmentCollection.insertOne(appoinment);
       res.send(result);
     })
+
+    app.get('/appoinment/patient/:patient_id', async (req, res) => {
+      const patientId = req.params.patient_id;
+      const appointments = await appoinmentCollection.find({ patient: patientId }).toArray();
+      res.send(appointments);
+    });
+  
+    // Get appointments by doctor_id
+    app.get('/appoinment/doctor/:doctor_id', async (req, res) => {
+        const doctorId = req.params.doctor_id;
+        const appointments = await appoinmentCollection.find({ doctor: doctorId }).toArray();
+        res.send(appointments);
+    });
 
     // telemedicine API 
     app.get('/telemedicine-appoinment', async (req, res) => {
