@@ -76,6 +76,7 @@ async function run() {
     const doctorsCollection = client.db('curehub').collection('doctor');
     const telemedicineCollection = client.db('curehub').collection('telemedicine');
     const reportsCollection = client.db('curehub').collection('reports');
+    const appointmentCancelCollection = client.db('curehub').collection('appointmentCancelation');
 
 
     //  a new collection for calls 
@@ -391,6 +392,20 @@ async function run() {
           res.status(404).send({ message: 'Appointment not found.' });
       }
   });
+
+
+
+  // Afer cancel a Appointment, store Headers
+  app.get('/cancel/getall/appoinment', async (req, res) => {
+    const cancel = await appointmentCancelCollection.find().toArray();
+    res.send(cancel);
+  })
+  app.post('/cancel/appoinment', async (req, res) => {
+    const cancel = req.body;
+    console.log(cancel);
+    const result = await appointmentCancelCollection.insertOne(cancel);
+    res.send(result);
+  })
   
 
     // telemedicine API 
