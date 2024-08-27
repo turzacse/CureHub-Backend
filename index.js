@@ -406,19 +406,26 @@ async function run() {
     const result = await appointmentCancelCollection.insertOne(cancel);
     res.send(result);
   })
+  app.delete('/cancel/delete-all', async (req, res) => {
+    try {
+        // Delete all documents from the collection
+        const result = await appointmentCancelCollection.deleteMany({});
+        
+        if (result.deletedCount > 0) {
+            res.status(200).json({ message: `${result.deletedCount} appointments cancelled.` });
+        } else {
+            res.status(404).json({ message: 'No appointments found to delete.' });
+        }
+    } catch (error) {
+        console.error('Error deleting all appointments:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
   
 
-    // telemedicine API 
-    // app.get('/telemedicine-appoinment', async (req, res) => {
-    //   const telemedicine = await telemedicineCollection.find().toArray();
-    //   res.send(telemedicine);
-    // })
     app.get('/telemedicine-appointment', async (req, res) => {
       try {
-          // Fetch all telemedicine appointments from the collection
           const telemedicineAppointments = await telemedicineCollection.find().toArray();
-  
-          // Check if appointments are found
           if (telemedicineAppointments.length > 0) {
               res.status(200).send(telemedicineAppointments);
           } else {
@@ -444,20 +451,6 @@ async function run() {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
-
-    // app.get('/telemedicine-appointment/:cureHubUser', async (req, res) => {
-    //   const cureHubUser = req.params.cureHubUser;
-    //   try {
-    //     const telemedicineAppointments = await telemedicineCollection.find({ cureHubUser: cureHubUser }).toArray();
-    //     if (telemedicineAppointments.length > 0) {
-    //       res.send(telemedicineAppointments);
-    //     } else {
-    //       res.status(404).send({ message: 'Telemedicine appointments not found' });
-    //     }
-    //   } catch (error) {
-    //     res.status(500).send({ message: 'Internal Server Error' });
-    //   }
-    // });
     app.get('/telemedicine-appointment/:cureHubUser', async (req, res) => {
       const { cureHubUser } = req.params; // Use destructuring to get cureHubUser from params
       console.log(`Received request for cureHubUser: ${cureHubUser}`);
