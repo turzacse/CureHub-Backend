@@ -406,7 +406,7 @@ async function run() {
     
     try {
         // Find appointments where the cureHubUser matches the provided parameter
-        const appointments = await appointmentCancelCollection.find({ cureHubUser: cureHubUser }).toArray();
+        const appointments = await appointmentCancelCollection.find({ curehubUser: cureHubUser }).toArray();
         
         if (appointments.length > 0) {
             console.log(`Found ${appointments.length} appointments for cureHubUser: ${cureHubUser}`);
