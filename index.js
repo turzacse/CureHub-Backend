@@ -400,6 +400,27 @@ async function run() {
     const cancel = await appointmentCancelCollection.find().toArray();
     res.send(cancel);
   })
+  app.get('/cancel/appointments/:cureHubUser', async (req, res) => {
+    const cureHubUser = req.params.cureHubUser;
+    console.log(`Received request for cureHubUser: ${cureHubUser}`);
+    
+    try {
+        // Find appointments where the cureHubUser matches the provided parameter
+        const appointments = await appointmentCancelCollection.find({ cureHubUser: cureHubUser }).toArray();
+        
+        if (appointments.length > 0) {
+            console.log(`Found ${appointments.length} appointments for cureHubUser: ${cureHubUser}`);
+            res.status(200).json(appointments);
+        } else {
+            console.log('No appointments found for the provided cureHubUser');
+            res.status(404).json({ message: 'No appointments found for the provided cureHubUser' });
+        }
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
   app.post('/cancel/appoinment', async (req, res) => {
     const cancel = req.body;
     console.log(cancel);
