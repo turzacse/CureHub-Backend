@@ -66,6 +66,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     //await client.connect();
 
+    // collection ---> Table
     const userCollection = client.db('curehub').collection('users');
     const medicineCollection = client.db('curehub').collection('medicines');
     const adsCollection = client.db('curehub').collection('ads');
@@ -78,28 +79,6 @@ async function run() {
     const reportsCollection = client.db('curehub').collection('reports');
     const appointmentCancelCollection = client.db('curehub').collection('appointmentCancelation');
 
-
-    //  a new collection for calls 
-    const callCollection = client.db('curehub').collection('calls');
-
-
-    // stripe
-    //     app.post('/create-payment-intent', async (req, res) => {
-    //   const { amount } = req.body;
-
-    //   try {
-    //     const paymentIntent = await stripe.paymentIntents.create({
-    //       amount,
-    //       currency: 'usd',
-    //     });
-
-    //     res.send({
-    //       clientSecret: paymentIntent.client_secret,
-    //     });
-    //   } catch (error) {
-    //     res.status(500).send({ error: error.message });
-    //   }
-    // });
 
     // chatGPT processing........
 
@@ -140,43 +119,6 @@ async function run() {
         res.status(500).send({ message: 'Failed to generate or save report' });
       }
     });
-
-
-  //   app.get('/reports', async (req, res) => {
-  //     try {
-  //         // Find all reports in the database
-  //         const reports = await reportsCollection.find({}).toArray();
-  
-  //         res.send({ message: 'Reports retrieved successfully', reports });
-  //     } catch (error) {
-  //         console.error('Error retrieving reports:', error);
-  //         res.status(500).send({ message: 'Failed to retrieve reports' });
-  //     }
-  // });
-
-//   app.get('/report/:id', async (req, res) => {
-//     const { id } = req.params;
-
-//     if (!id) {
-//         return res.status(400).send({ message: 'Report ID is required' });
-//     }
-
-//     try {
-//         // Find the report in the database by ID
-//         const report = await reportsCollection.findOne({ _id: new MongoClient.ObjectId(id) });
-
-//         if (!report) {
-//             return res.status(404).send({ message: 'Report not found' });
-//         }
-
-//         res.send({ message: 'Report retrieved successfully', report });
-//     } catch (error) {
-//         console.error('Error retrieving report:', error);
-//         res.status(500).send({ message: 'Failed to retrieve report' });
-//     }
-// });
-
-    
 
     // user related api 
     app.get('/users', async (req, res) => {
@@ -272,6 +214,26 @@ async function run() {
       const carts = await cartCollection.find().toArray();
       res.send(carts);
     })
+
+    app.get('/carts/:cureHubUser', async (req, res) => {
+      const { cureHubUser } = req.params;
+      console.log(`Received request for cureHubUser: ${cureHubUser}`);
+      try {
+        const carts = await cartCollection.find({ cureHubUser }).toArray();
+        
+        if (carts.length > 0) {
+          console.log(`Found ${carts.length} carts`);
+          res.send(carts);
+        } else {
+          console.log('No carts found');
+          res.status(404).send({ message: 'Carts not found' });
+        }
+      } catch (error) {
+        console.error('Error fetching carts:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+    
 
     app.post('/carts', async (req, res) => {
       const carts = req.body;
@@ -393,8 +355,6 @@ async function run() {
       }
   });
 
-
-
   // Afer cancel a Appointment, store Headers
   app.get('/cancel/getall/appoinment', async (req, res) => {
     const cancel = await appointmentCancelCollection.find().toArray();
@@ -442,7 +402,6 @@ async function run() {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
-  
 
     app.get('/telemedicine-appointment', async (req, res) => {
       try {
@@ -457,8 +416,6 @@ async function run() {
           res.status(500).send({ message: 'Internal Server Error' });
       }
   });
-  
-
     app.get('/telemedicine-appoinment/:id', async (req, res) => {
       const id = req.params.id;
       try {
@@ -473,11 +430,9 @@ async function run() {
       }
     });
     app.get('/telemedicine-appointment/:cureHubUser', async (req, res) => {
-      const { cureHubUser } = req.params; // Use destructuring to get cureHubUser from params
+      const { cureHubUser } = req.params;
       console.log(`Received request for cureHubUser: ${cureHubUser}`);
-      
       try {
-          // Ensure you use the correct collection and field name
           const telemedicineAppointments = await telemedicineCollection.find({ cureHubUser }).toArray();
   
           if (telemedicineAppointments.length > 0) {
@@ -492,8 +447,6 @@ async function run() {
           res.status(500).send({ message: 'Internal Server Error' });
       }
   });  
-    
-
     app.post('/telemedicine-appoinment', async (req, res) => {
       const telemedicine = req.body;
       console.log(telemedicine);
@@ -513,8 +466,6 @@ async function run() {
       }
   });
     
-  
-
 
     // app.post('/jwt', async (req, res) => {
     //   const logged = req.body;
@@ -535,38 +486,6 @@ async function run() {
     //   res.clearCookie('token', { maxAge: 0 }).send({ success: true })
     // })
 
-    // app.put('/allfoods/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) }
-    //   const options = { upset: true };
-    //   const updatedProduct = req.body;
-    //   const food = {
-    //     $set: {
-    //       foodName: updatedProduct.foodName,
-    //       foodCategory: updatedProduct.foodCategory,
-    //       quantity: updatedProduct.quantity,
-    //       origin: updatedProduct.origin,
-    //       price: updatedProduct.price,
-    //       descriptions: updatedProduct.descriptions,
-    //     }
-    //   }
-    //   const result = await foodCollection.updateOne(filter, food, options);
-    //   res.send(result);
-    // })
-
-
-
-    // app.get('/topfoods', async (req, res) => {
-    //   const topFood = await foodCollection
-    //     .find()
-    //     .sort({ ordersCount: -1 })
-    //     .limit(6)
-    //     .toArray();
-
-    //   res.send(topFood);
-    // })
-
-
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -576,17 +495,10 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
-
-
 app.get('/', (req, res) => {
   res.send('server is running');
 })
-
-
 app.listen(port, () => {
   console.log(`server is runnin on port: ${port}`);
 })
-
 module.exports = app;
