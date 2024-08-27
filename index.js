@@ -486,16 +486,38 @@ async function run() {
       const result = await telemedicineCollection.insertOne(telemedicine);
       res.send(result);
     })
+    // app.delete('/telemedicine-appointment/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const result = await telemedicineCollection.deleteOne({ _id: ObjectId(id) });
+
+    //   if (result.deletedCount === 1) {
+    //     res.status(200).json({ message: 'Telemedicine appointment deleted successfully' });
+    //   } else {
+    //     res.status(404).json({ message: 'Telemedicine appointment not found' });
+    //   }
+    // });
     app.delete('/telemedicine-appointment/:id', async (req, res) => {
       const id = req.params.id;
-      const result = await telemedicineCollection.deleteOne({ _id: ObjectId(id) });
-
-      if (result.deletedCount === 1) {
-        res.status(200).json({ message: 'Telemedicine appointment deleted successfully' });
-      } else {
-        res.status(404).json({ message: 'Telemedicine appointment not found' });
+  
+      try {
+          // Ensure the ID is a valid ObjectId
+          if (!ObjectId.isValid(id)) {
+              return res.status(400).json({ message: 'Invalid appointment ID' });
+          }
+          // Attempt to delete the appointment
+          const result = await telemedicineCollection.deleteOne({ _id: ObjectId(id) });
+  
+          // Check if the appointment was successfully deleted
+          if (result.deletedCount === 1) {
+              res.status(200).json({ message: 'Telemedicine appointment deleted successfully' });
+          } else {
+              res.status(404).json({ message: 'Telemedicine appointment not found' });
+          }
+      } catch (error) {
+          console.error('Error deleting telemedicine appointment:', error);
+          res.status(500).json({ message: 'Internal Server Error' });
       }
-    });
+  });
 
 
     // app.post('/jwt', async (req, res) => {
