@@ -409,10 +409,27 @@ async function run() {
   
 
     // telemedicine API 
-    app.get('/telemedicine-appoinment', async (req, res) => {
-      const telemedicine = await telemedicineCollection.find().toArray();
-      res.send(telemedicine);
-    })
+    // app.get('/telemedicine-appoinment', async (req, res) => {
+    //   const telemedicine = await telemedicineCollection.find().toArray();
+    //   res.send(telemedicine);
+    // })
+    app.get('/telemedicine-appointment', async (req, res) => {
+      try {
+          // Fetch all telemedicine appointments from the collection
+          const telemedicineAppointments = await telemedicineCollection.find().toArray();
+  
+          // Check if appointments are found
+          if (telemedicineAppointments.length > 0) {
+              res.status(200).send(telemedicineAppointments);
+          } else {
+              res.status(404).send({ message: 'No telemedicine appointments found' });
+          }
+      } catch (error) {
+          console.error('Error fetching telemedicine appointments:', error);
+          res.status(500).send({ message: 'Internal Server Error' });
+      }
+  });
+  
 
     app.get('/telemedicine-appoinment/:id', async (req, res) => {
       const id = req.params.id;
