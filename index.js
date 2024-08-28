@@ -78,6 +78,8 @@ async function run() {
     const telemedicineCollection = client.db('curehub').collection('telemedicine');
     const reportsCollection = client.db('curehub').collection('reports');
     const appointmentCancelCollection = client.db('curehub').collection('appointmentCancelation');
+    const appointmentCompleteCollection = client.db('curehub').collection('completeAppointment');
+    
 
 
     // chatGPT processing........
@@ -207,8 +209,7 @@ async function run() {
       const result = await categoryCollection.insertOne(category);
       res.send(result);
     })
-
-
+    
     // cart API 
     app.get('/carts', async (req, res) => {
       const carts = await cartCollection.find().toArray();
@@ -401,7 +402,64 @@ async function run() {
         console.error('Error deleting all appointments:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
+  });
+
+
+
+
+
+  // Afer Successfull complete a Appointment, store hear
+  app.get('/complete/getall/appoinment', async (req, res) => {
+    const complete = await appointmentCompleteCollection.find().toArray();
+    res.send(complete);
+  })
+
+  app.get('/complete/appointment/:cureHubUser', async (req, res) => {
+    const cureHubUser = req.params.cureHubUser;
+    console.log(`Received request for cureHubUser: ${cureHubUser}`);
+    
+    try {
+        // Find appointments where the cureHubUser matches the provided parameter
+        const appointments = await appointmentCompleteCollection.find({ curehubUser: cureHubUser }).toArray();
+        
+        if (appointments.length > 0) {
+            console.log(`Found ${appointments.length} appointments for cureHubUser: ${cureHubUser}`);
+            res.status(200).json(appointments);
+        } else {
+            console.log('No appointments found for the provided cureHubUser');
+            res.status(404).json({ message: 'No appointments found for the provided cureHubUser' });
+        }
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
 });
+
+  app.post('/complete/appoinment', async (req, res) => {
+    const complete = req.body;
+    console.log(complete);
+    const result = await appointmentCompleteCollection.insertOne(complete);
+    res.send(result);
+  })
+  app.delete('/complete/delete-all', async (req, res) => {
+    try {
+        // Delete all documents from the collection
+        const result = await appointmentCompleteCollection.deleteMany({});
+        
+        if (result.deletedCount > 0) {
+            res.status(200).json({ message: `${result.deletedCount} appointments cancelled.` });
+        } else {
+            res.status(404).json({ message: 'No appointments found to delete.' });
+        }
+    } catch (error) {
+        console.error('Error deleting all appointments:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
+
+
+
+
 
     app.get('/telemedicine-appointment', async (req, res) => {
       try {
