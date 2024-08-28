@@ -296,6 +296,25 @@ async function run() {
       const result = await doctorsCollection.insertOne(doctors);
       res.send(result);
     })
+    app.put('/doctors/update/:id', async (req, res) => {
+      const { id } = req.params; 
+      const updateFields = req.body;
+      try {
+          const result = await doctorsCollection.updateOne(
+              { _id: new ObjectId(id) },
+              { $set: updateFields } 
+          );
+          if (result.matchedCount === 0) {
+              res.status(404).send({ message: 'Doctor not found' });
+              return;
+          }
+          res.send({ message: 'Doctor updated successfully', result });
+      } catch (error) {
+          console.error(error);
+          res.status(500).send({ message: 'An error occurred while updating the doctor', error });
+      }
+  });
+  
     app.delete('/doctors/delete-all', async (req, res) => {
       try {
           const result = await doctorsCollection.deleteMany({});
