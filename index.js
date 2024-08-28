@@ -285,7 +285,6 @@ async function run() {
     });
 
     // doctors API
-
     app.get('/doctors', async (req, res) => {
       const doctors = await doctorsCollection.find().toArray();
       res.send(doctors);
@@ -297,6 +296,20 @@ async function run() {
       const result = await doctorsCollection.insertOne(doctors);
       res.send(result);
     })
+    app.delete('/doctors/delete-all', async (req, res) => {
+      try {
+          const result = await doctorsCollection.deleteMany({});
+          
+          if (result.deletedCount > 0) {
+              res.status(200).json({ message: `${result.deletedCount} doctors removed.` });
+          } else {
+              res.status(404).json({ message: 'No doctors found to delete.' });
+          }
+      } catch (error) {
+          console.error('Error deleting all appointments:', error);
+          res.status(500).json({ message: 'Internal Server Error' });
+      }
+    });
 
     // Appoinment API 
     app.get('/appoinment', async (req, res) => {
@@ -403,8 +416,6 @@ async function run() {
         res.status(500).json({ message: 'Internal Server Error' });
     }
   });
-
-
 
 
 
