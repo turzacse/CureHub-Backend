@@ -293,7 +293,7 @@ async function run() {
     app.get('/doctors/telemedicine', async (req, res) => {
       try {
           const telemedicineDoctors = await doctorsCollection.find({
-              status: "Approved",
+              status: 'Approved',
               telemedicine: true
           }).toArray();
           
@@ -303,6 +303,7 @@ async function run() {
           res.status(500).send({ message: 'An error occurred while fetching telemedicine doctors', error });
       }
   });
+  
   
 
     app.post('/doctors', async (req, res) => {
