@@ -90,7 +90,7 @@ async function run() {
         payment_method_types: ['card'],
         line_items: items.map(item => ({
           price_data: {
-            currency: 'bdt',
+            currency: 'usd',
             product_data: {
               name: item.name,
             },
