@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-const stripe = Stripe('sk_test_51OMCncJNucR5rk9lcKrEYph53hR2ke2jAt8BuN7BnvpKv2MTU0cqZ957ofkemofDZTkdHS8nIKeLc214qKwXH5B20080a2YfA1');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bnzewy6.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -85,25 +85,31 @@ async function run() {
   app.post('/create-checkout-session', async (req, res) => {
     const { items } = req.body;
   
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: items.map(item => ({
-        price_data: {
-          currency: 'bdt',
-          product_data: {
-            name: item.name,
+    try {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: items.map(item => ({
+          price_data: {
+            currency: 'bdt',
+            product_data: {
+              name: item.name,
+            },
+            unit_amount: item.price * 100,
           },
-          unit_amount: item.price * 100, // Amount in the smallest currency unit
-        },
-        quantity: item.quantity,
-      })),
-      mode: 'payment',
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/cancel',
-    });
+          quantity: item.quantity,
+        })),
+        mode: 'payment',
+        // success_url: 'http://localhost:3000/success',
+        // cancel_url: 'http://localhost:3000/cancel',
+      });
   
-    res.json({ id: session.id });
+      res.json({ id: session.id });
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   });
+  
 
 
     app.post('/analysis-report', async (req, res) => {
