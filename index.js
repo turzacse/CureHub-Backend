@@ -99,8 +99,8 @@ async function run() {
           quantity: item.quantity,
         })),
         mode: 'payment',
-        // success_url: 'http://localhost:3000/success',
-        // cancel_url: 'http://localhost:3000/cancel',
+        success_url: 'http://localhost:5173/success', // Updated to port 5173
+      cancel_url: 'http://localhost:5173/cancel',  // Updated to port 5173
       });
   
       res.json({ id: session.id });
