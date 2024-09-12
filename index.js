@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
@@ -25,6 +26,8 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+const apiKey = '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'; //lammaaaa
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -81,6 +84,32 @@ async function run() {
     const appointmentCompleteCollection = client.db('curehub').collection('completeAppointment');
     
      
+
+  // llammmaaa
+  app.post('/generate-text', async (req, res) => {
+    const { prompt } = req.body;
+  
+    try {
+      const response = await axios.post('https://api.groq.com/v1/text/generate', {
+        prompt: prompt,
+        model: 'llama-3.1', // Specify the Llama 3.1 model
+        // Include other parameters as needed
+      }, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      // Send the generated text back to the client
+      res.json(response.data);
+    } catch (error) {
+      console.error('Error generating text:', error);
+      res.status(500).json({ error: 'An error occurred while generating text' });
+    }
+  });
+
+  
   //  stripe payment 
   app.post('/create-checkout-session', async (req, res) => {
     const { items } = req.body;
