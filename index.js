@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 // const { OpenAIApi, Configuration } = require('openai');
 const Stripe = require('stripe');
+const nodemailer = require('nodemailer');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -245,6 +246,72 @@ async function run() {
       const result = await contact.toArray();
       res.send(result);
     })
+    app.get('/contact-us/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const contact = await ContactCollection.findOne(query);
+      
+      if (contact) {
+        res.send(contact);
+      } else {
+        res.status(404).send({ message: 'Contact not found' });
+      }
+    });    
+    app.delete('/contact-us/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await ContactCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.put('/contact-us/:id/reply', async (req, res) => {
+      const id = req.params.id;
+      const { reply, replyName } = req.body; // Extract reply and replyName from request body
+      const query = { _id: new ObjectId(id) };
+      
+      // Update the contact with the reply and replyName
+      const result = await ContactCollection.updateOne(query, {
+        $set: {
+          reply: reply,
+          replyName: replyName
+        }
+      });
+    
+      if (result.modifiedCount > 0) {
+        // Send email to the user
+        const contact = await ContactCollection.findOne(query);
+        if (contact && contact.email) {
+          // Configure your email transport
+          const transporter = nodemailer.createTransport({
+            service: 'Gmail', // or any other email service
+            auth: {
+              user: 'turzacse@gmail.com', // Your email
+              pass: 'turza@cse039' // Your email password or app password
+            }
+          });
+    
+          const mailOptions = {
+            from: 'turzacse@gmail.com',
+            to: contact?.email,
+            subject: 'Reply to Your Inquiry',
+            text: `Dear ${contact.name},\n\n${replyName} has replied to your inquiry:\n\n${reply}\n\nBest regards,\nYour Team`
+          };
+    
+          // Send the email
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.error('Error sending email:', error);
+              return res.status(500).send({ message: 'Error sending email' });
+            }
+            console.log('Email sent:', info.response);
+          });
+        }
+        
+        res.send({ message: 'Reply sent successfully' });
+      } else {
+        res.status(404).send({ message: 'Contact not found or no changes made' });
+      }
+    });
 
 
     //  Advertisement 
@@ -265,7 +332,6 @@ async function run() {
     })
 
     // category 
-
     app.get('/category', async (req, res) => {
       console.log(req.body);
       console.log('owener info: ', req.user);
@@ -306,8 +372,6 @@ async function run() {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
-    
-
     app.post('/carts', async (req, res) => {
       const carts = req.body;
       console.log(carts);
@@ -356,9 +420,6 @@ async function run() {
       }
     });
 
-
-
-
     // doctors API
     app.get('/doctors', async (req, res) => {
       const doctors = await doctorsCollection.find().toArray();
@@ -378,7 +439,6 @@ async function run() {
           res.status(500).send({ message: 'An error occurred while fetching telemedicine doctors', error });
       }
   });
-  
   
 
     app.post('/doctors', async (req, res) => {
@@ -526,8 +586,6 @@ async function run() {
         res.status(500).json({ message: 'Internal Server Error' });
     }
   });
-
-
 
   // Afer Successfull complete a Appointment, store hear
   app.get('/complete/getall/appoinment', async (req, res) => {
