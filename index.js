@@ -236,7 +236,7 @@ async function run() {
     // contactUS API's 
     app.post('/contact-us', async (req, res) => {
       const enquiry = req.body;
-      console.log(medicine);
+      console.log(enquiry);
       const result = await ContactCollection.insertOne(enquiry);
       res.send(result);
     })
