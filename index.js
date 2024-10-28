@@ -264,6 +264,16 @@ async function run() {
       res.send(result);
     })
 
+    app.delete('/contact-us/delete/all', async (req, res) => {
+      try {
+          const result = await ContactCollection.deleteMany({});
+          res.send({ deletedCount: result.deletedCount }); // Send back the count of deleted documents
+      } catch (error) {
+          console.error('Error deleting contacts:', error);
+          res.status(500).send('Internal Server Error');
+      }
+  });
+
     app.put('/contact-us/:id/reply', async (req, res) => {
       const id = req.params.id;
       const { reply, replyName } = req.body; // Extract reply and replyName from request body
