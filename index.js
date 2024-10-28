@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios');
+// const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
@@ -27,7 +27,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-const apiKey = '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'; //lammaaaa
+// const apiKey = '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'; 
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -82,34 +82,35 @@ async function run() {
     const reportsCollection = client.db('curehub').collection('reports');
     const appointmentCancelCollection = client.db('curehub').collection('appointmentCancelation');
     const appointmentCompleteCollection = client.db('curehub').collection('completeAppointment');
+    const ContactCollection = client.db('curehub').collection('contacts');
     
      
 
   // llammmaaa
-  app.post('/generate-text', async (req, res) => {
-    const { prompt } = req.body;
+  // app.post('/generate-text', async (req, res) => {
+  //   const { prompt } = req.body;
   
-    try {
-      const response = await axios.post('https://api.groq.com/v1/text/generate', {
-        prompt: prompt,
-        model: 'llama-3.1', // Specify the Llama 3.1 model
-        // Include other parameters as needed
-      }, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
+  //   try {
+  //     const response = await axios.post('https://api.groq.com/v1/text/generate', {
+  //       prompt: prompt,
+  //       model: 'llama-3.1', // Specify the Llama 3.1 model
+  //       // Include other parameters as needed
+  //     }, {
+  //       headers: {
+  //         'Authorization': `Bearer ${apiKey}`,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
   
-      // Send the generated text back to the client
-      res.json(response.data);
-    } catch (error) {
-      console.error('Error generating text:', error);
-      res.status(500).json({ error: 'An error occurred while generating text' });
-    }
-  });
+  //     // Send the generated text back to the client
+  //     res.json(response.data);
+  //   } catch (error) {
+  //     console.error('Error generating text:', error);
+  //     res.status(500).json({ error: 'An error occurred while generating text' });
+  //   }
+  // });
 
-  
+
   //  stripe payment 
   app.post('/create-checkout-session', async (req, res) => {
     const { items } = req.body;
@@ -231,6 +232,20 @@ async function run() {
       res.send(result);
     })
 
+    // contactUS API's 
+    app.post('/contact-us', async (req, res) => {
+      const enquiry = req.body;
+      console.log(medicine);
+      const result = await ContactCollection.insertOne(enquiry);
+      res.send(result);
+    })
+    app.get('/contact-us', async (req, res) => {
+      console.log(req.body);
+      const contact = ContactCollection.find();
+      const result = await contact.toArray();
+      res.send(result);
+    })
+
 
     //  Advertisement 
     app.get('/ads', async (req, res) => {
@@ -340,6 +355,9 @@ async function run() {
         res.status(500).send({ error: 'Internal server error' });
       }
     });
+
+
+
 
     // doctors API
     app.get('/doctors', async (req, res) => {
