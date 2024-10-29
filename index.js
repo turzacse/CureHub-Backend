@@ -235,11 +235,17 @@ async function run() {
 
     // contactUS API's 
     app.post('/contact-us', async (req, res) => {
-      const enquiry = req.body;
+      const enquiry = {
+        ...req.body,
+        createdAt: new Date() // Add createdAt field with current date and time
+      };
+      
       console.log(enquiry);
+      
       const result = await ContactCollection.insertOne(enquiry);
       res.send(result);
-    })
+    });
+    
     app.get('/contact-us', async (req, res) => {
       console.log(req.body);
       const contact = ContactCollection.find();
