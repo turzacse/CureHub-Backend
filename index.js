@@ -290,50 +290,83 @@ async function run() {
       }
   });
 
+    // app.put('/contact-us/:id/reply', async (req, res) => {
+    //   const id = req.params.id;
+    //   const { reply, replyName } = req.body; // Extract reply and replyName from request body
+    //   const query = { _id: new ObjectId(id) };
+      
+    //   // Update the contact with the reply and replyName
+    //   const result = await ContactCollection.updateOne(query, {
+    //     $set: {
+    //       reply: reply,
+    //       replyName: replyName
+    //     }
+    //   });
+    
+    //   if (result.modifiedCount > 0) {
+    //     // Send email to the user
+    //     const contact = await ContactCollection.findOne(query);
+    //     if (contact && contact.email) {
+    //       // Configure your email transport
+    //       const transporter = nodemailer.createTransport({
+    //         service: 'Gmail', // or any other email service
+    //         auth: {
+    //           user: 'turzacse@gmail.com', // Your email
+    //           pass: 'turza@cse039' // Your email password or app password
+    //         }
+    //       });
+    
+    //       const mailOptions = {
+    //         from: 'turzacse@gmail.com',
+    //         to: contact?.email,
+    //         subject: 'Reply to Your Inquiry',
+    //         text: `Dear ${contact.name},\n\n${replyName} has replied to your inquiry:\n\n${reply}\n\nBest regards,\nYour Team`
+    //       };
+    
+    //       // Send the email
+    //       transporter.sendMail(mailOptions, (error, info) => {
+    //         if (error) {
+    //           console.error('Error sending email:', error);
+    //           return res.status(500).send({ message: 'Error sending email' });
+    //         }
+    //         console.log('Email sent:', info.response);
+    //       });
+    //     }
+        
+    //     res.send({ message: 'Reply sent successfully' });
+    //   } else {
+    //     res.status(404).send({ message: 'Contact not found or no changes made' });
+    //   }
+    // });
     app.put('/contact-us/:id/reply', async (req, res) => {
       const id = req.params.id;
-      const { reply, replyName } = req.body; // Extract reply and replyName from request body
+      const { replymsg } = req.body; // Extract reply message from request body
       const query = { _id: new ObjectId(id) };
-      
-      // Update the contact with the reply and replyName
+    
+      // Get the current time in the desired format
+      const time = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Dhaka',
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(new Date());
+    
+      // Update the contact with the new reply object
       const result = await ContactCollection.updateOne(query, {
-        $set: {
-          reply: reply,
-          replyName: replyName
+        $push: {
+          reply: {
+            replymsg: replymsg,
+            time: time
+          }
         }
       });
     
       if (result.modifiedCount > 0) {
-        // Send email to the user
-        const contact = await ContactCollection.findOne(query);
-        if (contact && contact.email) {
-          // Configure your email transport
-          const transporter = nodemailer.createTransport({
-            service: 'Gmail', // or any other email service
-            auth: {
-              user: 'turzacse@gmail.com', // Your email
-              pass: 'turza@cse039' // Your email password or app password
-            }
-          });
-    
-          const mailOptions = {
-            from: 'turzacse@gmail.com',
-            to: contact?.email,
-            subject: 'Reply to Your Inquiry',
-            text: `Dear ${contact.name},\n\n${replyName} has replied to your inquiry:\n\n${reply}\n\nBest regards,\nYour Team`
-          };
-    
-          // Send the email
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              console.error('Error sending email:', error);
-              return res.status(500).send({ message: 'Error sending email' });
-            }
-            console.log('Email sent:', info.response);
-          });
-        }
-        
-        res.send({ message: 'Reply sent successfully' });
+        res.send({ message: 'Reply added successfully' });
       } else {
         res.status(404).send({ message: 'Contact not found or no changes made' });
       }
