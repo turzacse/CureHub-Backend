@@ -209,6 +209,7 @@ async function run() {
     })
 
 
+
     //medicine related API
     app.get('/medicine', async (req, res) => {
       console.log(req.body);
@@ -255,7 +256,6 @@ async function run() {
       res.send(result);
     });
     
-    
     app.get('/contact-us', async (req, res) => {
       console.log(req.body);
       const contact = ContactCollection.find();
@@ -272,7 +272,25 @@ async function run() {
       } else {
         res.status(404).send({ message: 'Contact not found' });
       }
-    });    
+    });
+    app.get('/contact-us/user/:userID', async (req, res) => {
+      const userID = req.params.userID;
+      const query = { userID: userID }; // Query by userID
+  
+      try {
+          const contacts = await ContactCollection.find(query).toArray();
+          
+          if (contacts.length > 0) {
+              res.send(contacts);
+          } else {
+              res.status(404).send({ message: 'No contacts found for this userID' });
+          }
+      } catch (error) {
+          console.error("Error fetching contacts by userID:", error);
+          res.status(500).send({ message: 'Internal server error' });
+      }
+  });
+      
     app.delete('/contact-us/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -338,6 +356,7 @@ async function run() {
     //     res.status(404).send({ message: 'Contact not found or no changes made' });
     //   }
     // });
+    
     app.put('/contact-us/:id/reply', async (req, res) => {
       const id = req.params.id;
       const { replymsg } = req.body; // Extract reply message from request body
