@@ -572,6 +572,25 @@ async function run() {
       res.send(result);
     })
 
+    // delete all appoinment 
+    app.delete('/appoinment/delete-all', async (req, res) => {
+      try {
+          const result = await appoinmentCollection.deleteMany({}); // Deletes all documents
+          res.send({
+              success: true,
+              message: 'All appointments have been deleted successfully.',
+              deletedCount: result.deletedCount, // Number of documents deleted
+          });
+      } catch (error) {
+          console.error('Error deleting appointments:', error);
+          res.status(500).send({
+              success: false,
+              message: 'Failed to delete appointments. Please try again later.',
+          });
+      }
+  });
+  
+
     app.get('/appoinment/patient/:patient_id', async (req, res) => {
       const patientId = req.params.patient_id;
       const appointments = await appoinmentCollection.find({ patient: patientId }).toArray();
