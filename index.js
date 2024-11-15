@@ -589,6 +589,29 @@ async function run() {
           });
       }
   });
+
+    // Appoinment Summary 
+    app.get('/appoinment/summary', async (req, res) => {
+      try {
+          const projection = {
+              doctor: 1, // Include `doctor`
+              appointedDate: 1, // Include `appointedDate`
+              appointedTime: 1, // Include `appointedTime`
+              _id: 0, // Exclude `_id` (optional, if you don't want it)
+          };
+  
+          const appointments = await appoinmentCollection.find({}, { projection }).toArray();
+  
+          res.send(appointments);
+      } catch (error) {
+          console.error('Error fetching appointment summary:', error);
+          res.status(500).send({
+              success: false,
+              message: 'Failed to fetch appointment summary. Please try again later.',
+          });
+      }
+  });
+  
   
 
     app.get('/appoinment/patient/:patient_id', async (req, res) => {
