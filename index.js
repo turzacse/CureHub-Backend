@@ -888,17 +888,19 @@ async function run() {
                     },
                 }, // Add the new appointment details
             },
-            { returnDocument: 'after' } // Return the updated document
+            { returnDocument: 'after' } // Return the updated document after modification
         );
 
-        if (updatedAppointment.value) {
-            res.status(200).send({
-                message: 'Appointment updated successfully',
-                updatedAppointment: updatedAppointment.value,
-            });
-        } else {
-            res.status(404).send({ message: 'Appointment not found' });
+        // Check if a document was matched and updated
+        if (!updatedAppointment.lastErrorObject.updatedExisting) {
+            return res.status(404).send({ message: 'Appointment not found' });
         }
+
+        // Return success response with updated data
+        res.status(200).send({
+            message: 'Appointment updated successfully',
+            updatedAppointment: updatedAppointment.value,
+        });
     } catch (error) {
         console.error('Error updating telemedicine appointment:', error);
         res.status(500).send({ message: 'Internal Server Error' });
@@ -907,7 +909,6 @@ async function run() {
 
 
 
-  
 
     app.delete('/telemedicine/delete/:id', async (req, res) => {
       const id = req.params.id;
