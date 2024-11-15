@@ -888,11 +888,11 @@ async function run() {
                     },
                 }, // Add the new appointment details
             },
-            { returnDocument: 'after' } // Return the updated document after modification
+            { returnDocument: 'after', returnOriginal: false } // Return the updated document after modification
         );
 
-        // Check if a document was matched and updated
-        if (!updatedAppointment.lastErrorObject.updatedExisting) {
+        // Check if the appointment was found and updated
+        if (!updatedAppointment.value) {
             return res.status(404).send({ message: 'Appointment not found' });
         }
 
@@ -906,6 +906,7 @@ async function run() {
         res.status(500).send({ message: 'Internal Server Error' });
     }
 });
+
 
 
 
