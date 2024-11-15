@@ -892,9 +892,9 @@ async function run() {
         );
 
         // Check if the appointment was found and updated
-        if (!updatedAppointment.value) {
-            return res.status(404).send({ message: 'Appointment not found' });
-        }
+        // if (!updatedAppointment.value) {
+        //     return res.status(404).send({ message: 'Appointment not found' });
+        // }
 
         // Return success response with updated data
         res.status(200).send({
