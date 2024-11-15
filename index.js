@@ -611,6 +611,40 @@ async function run() {
           });
       }
   });
+
+  app.get('/appoinment/summary/:doctorId', async (req, res) => {
+    try {
+        const { doctorId } = req.params; // Get doctor ID from URL parameter
+
+        const projection = {
+            doctor: 1, // Include `doctor`
+            appointedDate: 1, // Include `appointedDate`
+            appointedTime: 1, // Include `appointedTime`
+            _id: 0, // Exclude `_id` (optional)
+        };
+
+        // Fetch appointments for the given doctor ID
+        const appointments = await appoinmentCollection
+            .find({ doctor: doctorId }, { projection })
+            .toArray();
+
+        if (appointments.length === 0) {
+            return res.status(404).send({
+                success: false,
+                message: 'No appointments found for this doctor.',
+            });
+        }
+
+        res.send(appointments);
+    } catch (error) {
+        console.error('Error fetching appointments by doctor ID:', error);
+        res.status(500).send({
+            success: false,
+            message: 'Failed to fetch appointments. Please try again later.',
+        });
+    }
+});
+
   
   
 
