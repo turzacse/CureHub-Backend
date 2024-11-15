@@ -599,9 +599,9 @@ async function run() {
               appointedTime: 1, // Include `appointedTime`
               _id: 0, // Exclude `_id` (optional, if you don't want it)
           };
-  
+
           const appointments = await appoinmentCollection.find({}, { projection }).toArray();
-  
+
           res.send(appointments);
       } catch (error) {
           console.error('Error fetching appointment summary:', error);
@@ -610,40 +610,40 @@ async function run() {
               message: 'Failed to fetch appointment summary. Please try again later.',
           });
       }
-  });
+    });
 
-  app.get('/appoinment/summary/:doctorId', async (req, res) => {
-    try {
-        const { doctorId } = req.params; // Get doctor ID from URL parameter
+    app.get('/appoinment/summary/:doctorId', async (req, res) => {
+      try {
+          const { doctorId } = req.params; // Get doctor ID from URL parameter
 
-        const projection = {
-            doctor: 1, // Include `doctor`
-            appointedDate: 1, // Include `appointedDate`
-            appointedTime: 1, // Include `appointedTime`
-            _id: 0, // Exclude `_id` (optional)
-        };
+          const projection = {
+              doctor: 1, // Include `doctor`
+              appointedDate: 1, // Include `appointedDate`
+              appointedTime: 1, // Include `appointedTime`
+              _id: 0, // Exclude `_id` (optional)
+          };
 
-        // Fetch appointments for the given doctor ID
-        const appointments = await appoinmentCollection
-            .find({ doctor: doctorId }, { projection })
-            .toArray();
+          // Fetch appointments for the given doctor ID
+          const appointments = await appoinmentCollection
+              .find({ doctor: doctorId }, { projection })
+              .toArray();
 
-        if (appointments.length === 0) {
-            return res.status(404).send({
-                success: false,
-                message: 'No appointments found for this doctor.',
-            });
-        }
+          if (appointments.length === 0) {
+              return res.status(404).send({
+                  success: false,
+                  message: 'No appointments found for this doctor.',
+              });
+          }
 
-        res.send(appointments);
-    } catch (error) {
-        console.error('Error fetching appointments by doctor ID:', error);
-        res.status(500).send({
-            success: false,
-            message: 'Failed to fetch appointments. Please try again later.',
-        });
-    }
-});
+          res.send(appointments);
+      } catch (error) {
+          console.error('Error fetching appointments by doctor ID:', error);
+          res.status(500).send({
+              success: false,
+              message: 'Failed to fetch appointments. Please try again later.',
+          });
+      }
+    });
 
   
   
@@ -838,12 +838,76 @@ async function run() {
           res.status(500).send({ message: 'Internal Server Error' });
       }
   });  
-    app.post('/telemedicine-appoinment', async (req, res) => {
-      const telemedicine = req.body;
-      console.log(telemedicine);
-      const result = await telemedicineCollection.insertOne(telemedicine);
-      res.send(result);
-    })
+    // app.post('/telemedicine-appoinment', async (req, res) => {
+    //   const telemedicine = req.body;
+    //   console.log(telemedicine);
+    //   const result = await telemedicineCollection.insertOne(telemedicine);
+    //   res.send(result);
+    // })
+    app.post('/telemedicine-appointment', async (req, res) => {
+      try {
+          // Extract telemedicine data from the request body
+          const telemedicine = req.body;
+  
+          // Add initial status as "Not Assigned"
+          telemedicine.status = "Not Assigned";
+  
+          console.log(telemedicine);
+  
+          // Insert the telemedicine data into the collection
+          const result = await telemedicineCollection.insertOne(telemedicine);
+  
+          // Send the result back to the client
+          res.status(201).send({
+              message: "Telemedicine appointment created successfully",
+              result,
+          });
+      } catch (error) {
+          console.error("Error creating telemedicine appointment:", error);
+          res.status(500).send({ message: "Internal Server Error" });
+      }
+  });
+
+  // Update Talemedicine 
+  app.put('/telemedicine-appointment/:id', async (req, res) => {
+    const { id } = req.params; // Appointment ID from the URL
+    const { doctorId, doctorName, appointmentDate, appointmentTime } = req.body; // Data sent in the request body
+
+    try {
+        // Find the appointment by ID and update its status and appointment array
+        const updatedAppointment = await telemedicineCollection.findOneAndUpdate(
+            { _id: new ObjectId(id) }, // Match the appointment ID
+            {
+                $set: { status: 'Assigned' }, // Update status to 'Assigned'
+                $push: {
+                    appointments: {
+                        doctorId,
+                        doctorName,
+                        appointmentDate,
+                        appointmentTime,
+                    },
+                }, // Add the new appointment details
+            },
+            { returnDocument: 'after' } // Return the updated document
+        );
+
+        if (updatedAppointment.value) {
+            res.status(200).send({
+                message: 'Appointment updated successfully',
+                updatedAppointment: updatedAppointment.value,
+            });
+        } else {
+            res.status(404).send({ message: 'Appointment not found' });
+        }
+    } catch (error) {
+        console.error('Error updating telemedicine appointment:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
+
+
+  
 
     app.delete('/telemedicine/delete/:id', async (req, res) => {
       const id = req.params.id;
