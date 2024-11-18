@@ -140,6 +140,19 @@ async function run() {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+
+  const formatDateTime = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
   
 
 
@@ -221,11 +234,24 @@ async function run() {
     })
 
     app.post('/medicine', async (req, res) => {
-      const medicine = req.body;
-      console.log(medicine);
-      const result = await medicineCollection.insertOne(medicine);
-      res.send(result);
-    })
+    try {
+        const medicine = req.body;
+
+        // Add the `createdAt` field
+        medicine.createdAt = formatDateTime();
+
+        console.log('New Medicine:', medicine);
+
+        // Insert the medicine into the collection
+        const result = await medicineCollection.insertOne(medicine);
+
+        // Send the result back to the client
+        res.send(result);
+    } catch (error) {
+        console.error('Error adding medicine:', error);
+        res.status(500).send({ error: 'Failed to add medicine' });
+    }
+});
 
     app.delete('/medicine/:id', async (req, res) => {
       const id = req.params.id;
