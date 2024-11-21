@@ -140,7 +140,25 @@ async function run() {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+  
 
+  // create a payment intent 
+  app.post('/create-payment-intent', async (req, res) => {
+    const { amount, currency } = req.body; // Pass amount and currency from frontend
+  
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount, // Amount in smallest currency unit (e.g., cents for USD)
+        currency,
+      });
+  
+      res.status(200).send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
 
   const formatDateTime = () => {
     const now = new Date();
