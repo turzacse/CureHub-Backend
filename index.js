@@ -165,13 +165,14 @@ async function run() {
     try {
       const { price } = req.body;
   
-      // Extract API key from the Authorization header
-      const stripeSecretKey = req.headers.authorization?.split(" ")[1]; // Extract "Bearer <key>"
-      if (!stripeSecretKey) {
-        return res.status(401).send({ error: "Missing Stripe secret key in Authorization header" });
+      // Extract the API key from the Authorization header
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).send({ error: "Missing or invalid Authorization header" });
       }
+      const stripeSecretKey = authHeader.split("Bearer ")[1]; // Extract API key
   
-      // Initialize Stripe instance with the key from the header
+      // Initialize Stripe instance with the API key
       const stripe = Stripe(stripeSecretKey);
   
       // Validate `price`
