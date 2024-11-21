@@ -186,7 +186,7 @@ async function run() {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
-        payment_method_types: ["card"], // Specify payment method
+        payment_method_types: ["card"],
       });
   
       // Respond with the client secret
