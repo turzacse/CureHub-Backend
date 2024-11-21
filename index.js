@@ -5,14 +5,12 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 // const { OpenAIApi, Configuration } = require('openai');
-// const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 5000;
-// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const Stripe = require("stripe");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 
 //middleware
@@ -144,89 +142,68 @@ async function run() {
   
 
   // create a payment intent 
-  // app.post('/create-payment-intent', async (req, res) => {
-  //   const { amount, currency } = req.body; // Pass amount and currency from frontend
-  
-  //   try {
-  //     const paymentIntent = await stripe.paymentIntents.create({
-  //       amount, // Amount in smallest currency unit (e.g., cents for USD)
-  //       currency,
-  //     });
-  
-  //     res.status(200).send({
-  //       clientSecret: paymentIntent.client_secret,
-  //     });
-  //   } catch (error) {
-  //     res.status(500).send({ error: error.message });
-  //   }
-  // });
+  app.post('/create-payment-intent', async (req, res) => {
+    const { price } = req.body; // Pass amount and currency from frontend
+    const amount = parseInt(price*100);
 
-  app.post("/create-payment-intent", async (req, res) => {
-    try {
-      const { price } = req.body;
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: 'usd',
+      payment_method_types: ['card']
+    })
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    })
+    // try {
+    //   const paymentIntent = await stripe.paymentIntents.create({
+    //     amount, // Amount in smallest currency unit (e.g., cents for USD)
+    //     currency,
+    //   });
   
-      // Extract the API key from the Authorization header
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).send({ error: "Missing or invalid Authorization header" });
-      }
-      const stripeSecretKey = authHeader.split("Bearer ")[1]; // Extract API key
-  
-      // Initialize Stripe instance with the API key
-      const stripe = Stripe(stripeSecretKey);
-  
-      // Validate `price`
-      if (!price || typeof price !== "number") {
-        return res.status(400).send({ error: "Invalid price value. Ensure price is a valid number." });
-      }
-  
-      // Convert price to smallest currency unit (cents)
-      const amount = Math.round(price * 100);
-  
-      // Create a payment intent
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amount,
-        currency: "usd",
-        payment_method_types: ["card"],
-      });
-  
-      // Respond with the client secret
-      res.status(200).send({
-        clientSecret: paymentIntent.client_secret,
-      });
-    } catch (error) {
-      console.error("Error creating payment intent:", error.message);
-      res.status(500).send({ error: `Failed to create payment intent: ${error.message}` });
-    }
+    //   res.status(200).send({
+    //     clientSecret: paymentIntent.client_secret,
+    //   });
+    // } catch (error) {
+    //   res.status(500).send({ error: error.message });
+    // }
   });
 
-  
   // app.post("/create-payment-intent", async (req, res) => {
   //   try {
   //     const { price } = req.body;
   
-  //     // Check if `price` exists and is a valid number
+  //     // Extract the API key from the Authorization header
+  //     const authHeader = req.headers.authorization;
+  //     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  //       return res.status(401).send({ error: "Missing or invalid Authorization header" });
+  //     }
+  //     const stripeSecretKey = authHeader.split("Bearer ")[1]; // Extract API key
+  
+  //     // Initialize Stripe instance with the API key
+  //     const stripe = Stripe(stripeSecretKey);
+  
+  //     // Validate `price`
   //     if (!price || typeof price !== "number") {
   //       return res.status(400).send({ error: "Invalid price value. Ensure price is a valid number." });
   //     }
   
-  //     // Convert price to the smallest currency unit (cents)
+  //     // Convert price to smallest currency unit (cents)
   //     const amount = Math.round(price * 100);
   
   //     // Create a payment intent
   //     const paymentIntent = await stripe.paymentIntents.create({
   //       amount: amount,
   //       currency: "usd",
-  //       payment_method_types: ["card"], // Add supported payment methods
+  //       payment_method_types: ["card"],
   //     });
   
-  //     // Send back the client secret
+  //     // Respond with the client secret
   //     res.status(200).send({
   //       clientSecret: paymentIntent.client_secret,
   //     });
   //   } catch (error) {
   //     console.error("Error creating payment intent:", error.message);
-  //     res.status(500).send({ error: `Failed to create payment intent : ${error}` });
+  //     res.status(500).send({ error: `Failed to create payment intent: ${error.message}` });
   //   }
   // });
 
