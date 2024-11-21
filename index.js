@@ -14,13 +14,30 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 
 //middleware
+// app.use(cors({
+//   origin: [
+//     'https://curehub.web.app',
+//     'https://curehub.web.app.firebaseapp.com',
+//     'http://localhost:5173'
+//   ],
+//   credentials: true
+// }));
 app.use(cors({
-  origin: [
-    'https://curehub.web.app',
-    'https://curehub.web.app.firebaseapp.com',
-    'http://localhost:5173'
-  ],
-  credentials: true
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'https://curehub.web.app',
+      'https://curehub.web.app.firebaseapp.com',
+      'http://localhost:5173'
+    ];
+
+    // Allow requests with no origin (like mobile apps, Postman, curl, etc.)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },
+  credentials: true, // Allow cookies or credentials to be sent with the request
 }));
 // const allowedOrigins = ['http://localhost:5173', 'https://curehub.web.app'];
 // app.use(cors());
