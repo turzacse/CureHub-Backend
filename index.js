@@ -142,7 +142,7 @@ async function run() {
   
 
   // create a payment intent 
-  app.post('/create-payment-intent', async (req, res) => {
+  app.post('/create-intent', async (req, res) => {
     const { price } = req.body; // Pass amount and currency from frontend
     const amount = parseInt(price*100);
 
@@ -154,59 +154,10 @@ async function run() {
     res.send({
       clientSecret: paymentIntent.client_secret,
     })
-    // try {
-    //   const paymentIntent = await stripe.paymentIntents.create({
-    //     amount, // Amount in smallest currency unit (e.g., cents for USD)
-    //     currency,
-    //   });
-  
-    //   res.status(200).send({
-    //     clientSecret: paymentIntent.client_secret,
-    //   });
-    // } catch (error) {
-    //   res.status(500).send({ error: error.message });
-    // }
+    
   });
 
-  // app.post("/create-payment-intent", async (req, res) => {
-  //   try {
-  //     const { price } = req.body;
   
-  //     // Extract the API key from the Authorization header
-  //     const authHeader = req.headers.authorization;
-  //     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-  //       return res.status(401).send({ error: "Missing or invalid Authorization header" });
-  //     }
-  //     const stripeSecretKey = authHeader.split("Bearer ")[1]; // Extract API key
-  
-  //     // Initialize Stripe instance with the API key
-  //     const stripe = Stripe(stripeSecretKey);
-  
-  //     // Validate `price`
-  //     if (!price || typeof price !== "number") {
-  //       return res.status(400).send({ error: "Invalid price value. Ensure price is a valid number." });
-  //     }
-  
-  //     // Convert price to smallest currency unit (cents)
-  //     const amount = Math.round(price * 100);
-  
-  //     // Create a payment intent
-  //     const paymentIntent = await stripe.paymentIntents.create({
-  //       amount: amount,
-  //       currency: "usd",
-  //       payment_method_types: ["card"],
-  //     });
-  
-  //     // Respond with the client secret
-  //     res.status(200).send({
-  //       clientSecret: paymentIntent.client_secret,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error creating payment intent:", error.message);
-  //     res.status(500).send({ error: `Failed to create payment intent: ${error.message}` });
-  //   }
-  // });
-
   const formatDateTime = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');
