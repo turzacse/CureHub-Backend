@@ -5,13 +5,13 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 // const { OpenAIApi, Configuration } = require('openai');
-const Stripe = require('stripe');
+// const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 5000;
-// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_51OMCncJNucR5rk9lcKrEYph53hR2ke2jAt8BuN7BnvpKv2MTU0cqZ957ofkemofDZTkdHS8nIKeLc214qKwXH5B20080a2YfA1');
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 
 //middleware
@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 
 // const apiKey = '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'; 
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+// const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bnzewy6.mongodb.net/?retryWrites=true&w=majority`;
 
