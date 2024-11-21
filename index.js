@@ -162,23 +162,28 @@ async function run() {
   app.post("/create-payment-intent", async (req, res) => {
     try {
       const { price } = req.body;
-      console.log(price);
+  
+      // Check if `price` exists and is a valid number
       if (!price || typeof price !== "number") {
-        return res.status(400).send({ error: "Invalid price value" });
+        return res.status(400).send({ error: "Invalid price value. Ensure price is a valid number." });
       }
-      const amount = price * 100;
+  
+      // Convert price to the smallest currency unit (cents)
+      const amount = Math.round(price * 100);
+  
+      // Create a payment intent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
-        payment_method_types: ["card"],
+        payment_method_types: ["card"], // Add supported payment methods
       });
-
-      console.log(paymentIntent);
-      res.send({
+  
+      // Send back the client secret
+      res.status(200).send({
         clientSecret: paymentIntent.client_secret,
       });
     } catch (error) {
-      console.error("Error creating payment intent:", error);
+      console.error("Error creating payment intent:", error.message);
       res.status(500).send({ error: "Failed to create payment intent" });
     }
   });
