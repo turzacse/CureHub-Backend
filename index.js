@@ -27,6 +27,7 @@ app.use(cors({
     const allowedOrigins = [
       'https://curehub.web.app',
       'https://curehub.web.app.firebaseapp.com',
+      'https://curehub.web.app/payment',
       'http://localhost:5173'
     ];
 
