@@ -142,20 +142,7 @@ async function run() {
   
 
   // create a payment intent 
-  app.post('/create-intent', async (req, res) => {
-    const { price } = req.body; // Pass amount and currency from frontend
-    const amount = parseInt(price*100);
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount,
-      currency: 'usd',
-      payment_method_types: ['card']
-    });
-    res.send({
-      clientSecret: paymentIntent.client_secret,
-    })
-    
-  });
+  
 
   
   const formatDateTime = () => {
@@ -949,10 +936,6 @@ async function run() {
     }
 });
 
-
-
-
-
     app.delete('/telemedicine/delete/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -963,6 +946,22 @@ async function run() {
       } else {
           res.status(404).send({ message: 'Appointment not found.' });
       }
+  });
+
+
+  app.post('/create-intent', async (req, res) => {
+    const { price } = req.body; // Pass amount and currency from frontend
+    const amount = parseInt(price*100);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: 'usd',
+      payment_method_types: ['card']
+    });
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    })
+    
   });
     
 
