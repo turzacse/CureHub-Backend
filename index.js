@@ -159,34 +159,74 @@ async function run() {
   //     res.status(500).send({ error: error.message });
   //   }
   // });
+
   app.post("/create-payment-intent", async (req, res) => {
     try {
       const { price } = req.body;
   
-      // Check if `price` exists and is a valid number
+      // Extract API key from the Authorization header
+      const stripeSecretKey = req.headers.authorization?.split(" ")[1]; // Extract "Bearer <key>"
+      if (!stripeSecretKey) {
+        return res.status(401).send({ error: "Missing Stripe secret key in Authorization header" });
+      }
+  
+      // Initialize Stripe instance with the key from the header
+      const stripe = Stripe(stripeSecretKey);
+  
+      // Validate `price`
       if (!price || typeof price !== "number") {
         return res.status(400).send({ error: "Invalid price value. Ensure price is a valid number." });
       }
   
-      // Convert price to the smallest currency unit (cents)
+      // Convert price to smallest currency unit (cents)
       const amount = Math.round(price * 100);
   
       // Create a payment intent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
-        payment_method_types: ["card"], // Add supported payment methods
+        payment_method_types: ["card"], // Specify payment method
       });
   
-      // Send back the client secret
+      // Respond with the client secret
       res.status(200).send({
         clientSecret: paymentIntent.client_secret,
       });
     } catch (error) {
       console.error("Error creating payment intent:", error.message);
-      res.status(500).send({ error: `Failed to create payment intent : ${error}` });
+      res.status(500).send({ error: `Failed to create payment intent: ${error.message}` });
     }
   });
+
+  
+  // app.post("/create-payment-intent", async (req, res) => {
+  //   try {
+  //     const { price } = req.body;
+  
+  //     // Check if `price` exists and is a valid number
+  //     if (!price || typeof price !== "number") {
+  //       return res.status(400).send({ error: "Invalid price value. Ensure price is a valid number." });
+  //     }
+  
+  //     // Convert price to the smallest currency unit (cents)
+  //     const amount = Math.round(price * 100);
+  
+  //     // Create a payment intent
+  //     const paymentIntent = await stripe.paymentIntents.create({
+  //       amount: amount,
+  //       currency: "usd",
+  //       payment_method_types: ["card"], // Add supported payment methods
+  //     });
+  
+  //     // Send back the client secret
+  //     res.status(200).send({
+  //       clientSecret: paymentIntent.client_secret,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error creating payment intent:", error.message);
+  //     res.status(500).send({ error: `Failed to create payment intent : ${error}` });
+  //   }
+  // });
 
   const formatDateTime = () => {
     const now = new Date();
