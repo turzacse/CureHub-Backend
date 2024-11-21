@@ -14,28 +14,28 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 
 //middleware
-// app.use(cors({
-//   origin: [
-//     'https://tastebud-tavern.web.app',
-//     'https://tastebud-tavern.firebaseapp.com',
-//     'http://localhost:5173'
-//   ],
-//   credentials: true
-// }));
-const allowedOrigins = ['http://localhost:5173', 'https://curehub.web.app'];
-// app.use(cors());
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like from mobile apps or curl requests)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type'],
+  origin: [
+    'https://curehub.web.app',
+    'https://curehub.web.app.firebaseapp.com',
+    'http://localhost:5173'
+  ],
+  credentials: true
 }));
+// const allowedOrigins = ['http://localhost:5173', 'https://curehub.web.app'];
+// app.use(cors());
+// app.use(cors({
+//   origin: function(origin, callback) {
+//     // Allow requests with no origin (like from mobile apps or curl requests)
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type'],
+// }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
