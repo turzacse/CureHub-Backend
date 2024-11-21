@@ -184,7 +184,7 @@ async function run() {
       });
     } catch (error) {
       console.error("Error creating payment intent:", error.message);
-      res.status(500).send({ error: "Failed to create payment intent" });
+      res.status(500).send({ error: `Failed to create payment intent : ${error}` });
     }
   });
 
