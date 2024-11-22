@@ -225,15 +225,10 @@ async function run() {
       const user = req.body;
   
       try {
-          // Check if the email already exists in the database
           const existingUser = await userCollection.findOne({ email: user.email });
-  
           if (existingUser) {
-              // If the email exists, do not add and send a response
               return res.status(400).send({ message: "User with this email already exists" });
           }
-  
-          // Add createdAt field with the desired format
           const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
           user.createdAt = createdAt;
   
@@ -245,7 +240,7 @@ async function run() {
       } catch (error) {
           // Handle errors
           console.error(error);
-          res.status(500).send({ message: "Internal Server Error" });
+          res.status(500).send({ message: `Internal Server Error ${erroe}` });
       }
   });
 
