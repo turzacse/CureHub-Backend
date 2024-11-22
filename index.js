@@ -1007,7 +1007,7 @@ async function run() {
 
 
   app.post('/payments', async (req, res) => {
-    const { transactionID, amount, type, email, subtype } = req.body;
+    const { transactionID, amount, type, email, subtype, appointmentId, doctorName } = req.body;
 
     try {
         // Get the current timestamp for createdAt
@@ -1023,7 +1023,7 @@ async function run() {
         };
 
         // If the type is 'Member Ship Plan', add the details object
-        if (type === "Member Ship Plan") {
+        if (type == "Membership Plan") {
             const startDate = createdAt;
             const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
 
@@ -1031,6 +1031,12 @@ async function run() {
                 subtype,
                 startDate,
                 endDate
+            };
+        }
+        else if (type == 'Appointment Booking') {
+            paymentData.details = {
+              appointmentId,
+              doctorName
             };
         }
 
