@@ -246,6 +246,33 @@ async function run() {
       }
   });
 
+  app.delete('/users/:id', async (req, res) => {
+    const userId = req.params.id; // Extract user ID from URL params
+
+    try {
+        // Convert userId into MongoDB ObjectId
+        const objectId = new ObjectId(userId);
+
+        // Check if the user exists in the database
+        const existingUser = await userCollection.findOne({ _id: objectId });
+
+        if (!existingUser) {
+            // If the user does not exist, send a 404 response
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        // Delete the user from the database
+        const result = await userCollection.deleteOne({ _id: objectId });
+
+        // Send success response
+        res.send({ message: "User deleted successfully", result });
+    } catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).send({ message: "Internal Server Error" });
+    }
+});
+
 
 
     //medicine related API
