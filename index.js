@@ -1039,6 +1039,11 @@ async function run() {
               doctorName
             };
         }
+        else if (type == 'Telemedicine') {
+          paymentData.details = {
+            appointmentId,
+          };
+      }
 
         // Insert the payment data into the database
         const result = await PaymentCollection.insertOne(paymentData);
