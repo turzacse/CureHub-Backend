@@ -940,7 +940,7 @@ async function run() {
           const telemedicine = req.body;
   
           // Add initial status as "Not Assigned"
-          telemedicine.status = "Not Assigned";
+          telemedicine.status = "Not Paid";
   
           console.log(telemedicine);
   
@@ -1020,6 +1020,7 @@ app.put('/telemedicine-pay/:id', async (req, res) => {
           res.status(404).send({ message: 'Appointment not found.' });
       }
   });
+
 
   //*************** Paymet Mrthd ********//
   app.post('/create-intent', async (req, res) => {
