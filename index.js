@@ -142,40 +142,6 @@ async function run() {
   //   }
   // });
 
-
-  //  stripe payment 
-  app.post('/create-checkout-session', async (req, res) => {
-    const { items } = req.body;
-  
-    try {
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: items.map(item => ({
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: item.name,
-            },
-            unit_amount: item.price * 100,
-          },
-          quantity: item.quantity,
-        })),
-        mode: 'payment',
-        success_url: 'http://localhost:5173/success', // Updated to port 5173
-      cancel_url: 'http://localhost:5173/cancel',  // Updated to port 5173
-      });
-  
-      res.json({ id: session.id });
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
-
-  // create a payment intent 
-  
-
   
   const formatDateTime = () => {
     const now = new Date();
@@ -249,12 +215,39 @@ async function run() {
       }
     });
 
+    // app.post('/users', async (req, res) => {
+    //   const user = req.body;
+    //   console.log(user);
+    //   const result = await userCollection.insertOne(user);
+    //   res.send(result);
+    // })
     app.post('/users', async (req, res) => {
       const user = req.body;
-      console.log(user);
-      const result = await userCollection.insertOne(user);
-      res.send(result);
-    })
+  
+      try {
+          // Check if the email already exists in the database
+          const existingUser = await userCollection.findOne({ email: user.email });
+  
+          if (existingUser) {
+              // If the email exists, do not add and send a response
+              return res.status(400).send({ message: "User with this email already exists" });
+          }
+  
+          // Add createdAt field with the desired format
+          const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
+          user.createdAt = createdAt;
+  
+          // Insert the new user into the database
+          const result = await userCollection.insertOne(user);
+  
+          // Send success response
+          res.send(result);
+      } catch (error) {
+          // Handle errors
+          console.error(error);
+          res.status(500).send({ message: "Internal Server Error" });
+      }
+  });
 
 
 
@@ -706,9 +699,6 @@ async function run() {
       }
     });
 
-  
-  
-
     app.get('/appoinment/patient/:patient_id', async (req, res) => {
       const patientId = req.params.patient_id;
       const appointments = await appoinmentCollection.find({ patient: patientId }).toArray();
@@ -980,7 +970,7 @@ async function run() {
       }
   });
 
-
+  //*************** Paymet Mrthd ********//
   app.post('/create-intent', async (req, res) => {
     const { price } = req.body; // Pass amount and currency from frontend
     const amount = parseInt(price*100);
