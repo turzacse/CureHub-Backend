@@ -1034,17 +1034,31 @@ async function run() {
     }
 });
 
+// app.get('/payments', async (req, res) => {
+//   try {
+//       // Fetch all payment records
+//       const payments = await PaymentCollection.find().toArray();
+
+//       // Send the payment data as a response
+//       res.send(payments);
+//   } catch (error) {
+//       // Handle errors
+//       console.error(error);
+//       res.status(500).send({ message: "Internal Server Error" });
+//   }
+// });
+
 app.get('/payments', async (req, res) => {
   try {
-      // Fetch all payment records
       const payments = await PaymentCollection.find().toArray();
-
-      // Send the payment data as a response
-      res.send(payments);
+      if (payments.length > 0) {
+          res.status(200).send(payments);
+      } else {
+          res.status(404).send({ message: 'No telemedicine appointments found' });
+      }
   } catch (error) {
-      // Handle errors
-      console.error(error);
-      res.status(500).send({ message: "Internal Server Error" });
+      console.error('Error fetching telemedicine appointments:', error);
+      res.status(500).send({ message: 'Internal Server Error' });
   }
 });
 
