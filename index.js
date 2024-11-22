@@ -1083,7 +1083,7 @@ app.get('/payments', async (req, res) => {
 });
 
 
-app.get('/payment', async (req, res) => {
+app.get('/payment/type', async (req, res) => {
   try {
       const { type } = req.query; // Retrieve type from query params
 
@@ -1104,7 +1104,7 @@ app.get('/payment', async (req, res) => {
   }
 });
 
-app.get('/payment', async (req, res) => {
+app.get('/payment/email', async (req, res) => {
   try {
       const { email } = req.query; // Retrieve email from query params
 
