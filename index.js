@@ -995,7 +995,7 @@ app.put('/telemedicine-pay/:id', async (req, res) => {
       const updatedAppointment = await telemedicineCollection.findOneAndUpdate(
           { _id: new ObjectId(id) }, 
           {
-              $set: { status: 'Assigned' }, 
+              $set: { status: 'Paid' }, 
           },
           { returnDocument: 'after', returnOriginal: false }
       );
