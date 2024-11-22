@@ -1054,10 +1054,10 @@ app.get('/payments', async (req, res) => {
       if (payments.length > 0) {
           res.status(200).send(payments);
       } else {
-          res.status(404).send({ message: 'No telemedicine appointments found' });
+          res.status(404).send({ message: 'No payments found' });
       }
   } catch (error) {
-      console.error('Error fetching telemedicine appointments:', error);
+      console.error('Error fetching payments:', error);
       res.status(500).send({ message: 'Internal Server Error' });
   }
 });
