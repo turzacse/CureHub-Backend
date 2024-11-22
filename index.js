@@ -1065,7 +1065,7 @@ async function run() {
         console.error(error);
         res.status(500).send({ message: "Internal Server Error" });
     }
-});
+  });
 
 
 app.get('/payments', async (req, res) => {
@@ -1081,6 +1081,50 @@ app.get('/payments', async (req, res) => {
       res.status(500).send({ message: 'Internal Server Error' });
   }
 });
+
+
+app.get('/payments', async (req, res) => {
+  try {
+      const { type } = req.query; // Retrieve type from query params
+
+      // Ensure type is provided
+      if (!type) {
+          return res.status(400).send({ message: "Type is required" });
+      }
+
+      // Query payments based on the type
+      const payments = await PaymentCollection.find({ type }).toArray();
+
+      // Return the retrieved payments
+      res.send({ message: "Payments fetched successfully", payments });
+  } catch (error) {
+      // Handle errors
+      console.error(error);
+      res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+app.get('/payments', async (req, res) => {
+  try {
+      const { email } = req.query; // Retrieve email from query params
+
+      // Ensure email is provided
+      if (!email) {
+          return res.status(400).send({ message: "Email is required" });
+      }
+
+      // Query payments based on the email
+      const payments = await PaymentCollection.find({ email }).toArray();
+
+      // Return the retrieved payments
+      res.send({ message: "Payments fetched successfully", payments });
+  } catch (error) {
+      // Handle errors
+      console.error(error);
+      res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
 
 
 
