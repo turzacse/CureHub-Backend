@@ -1010,10 +1010,8 @@ async function run() {
     const { transactionID, amount, type, email, subtype, appointmentId, doctorName } = req.body;
 
     try {
-        // Get the current timestamp for createdAt
         const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
 
-        // Prepare the payment data
         const paymentData = {
             transactionID,
             amount,
@@ -1022,7 +1020,6 @@ async function run() {
             createdAt
         };
 
-        // If the type is 'Member Ship Plan', add the details object
         if (type == "Membership Plan") {
             const startDate = createdAt;
             const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
@@ -1043,12 +1040,25 @@ async function run() {
           paymentData.details = {
             appointmentId,
           };
-      }
-
-        // Insert the payment data into the database
+        }
+        else if (type == 'Medicine') {
+          const { medicines } = req.body; 
+      
+          if (Array.isArray(medicines) && medicines.length > 0) {
+              paymentData.details = {
+                  medicines: medicines.map(item => ({
+                      name: item.name,
+                      quantity: item.quantity
+                  }))
+              };
+          } else {
+              res.status(400).send({ message: "Invalid or missing medicines array" });
+              return; 
+          }
+        }
+      
         const result = await PaymentCollection.insertOne(paymentData);
 
-        // Send success response
         res.send({ message: "Payment added successfully", result });
     } catch (error) {
         // Handle errors
