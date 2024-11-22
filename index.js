@@ -240,7 +240,7 @@ async function run() {
       } catch (error) {
           // Handle errors
           console.error(error);
-          res.status(500).send({ message: `Internal Server Error ${erroe}` });
+          res.status(500).send({ message: `Internal Server Error ${error}` });
       }
   });
 
