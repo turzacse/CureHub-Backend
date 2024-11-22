@@ -60,9 +60,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-// const apiKey = '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'; 
-
-// const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bnzewy6.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -118,33 +115,7 @@ async function run() {
     const ContactCollection = client.db('curehub').collection('contacts');
     const PaymentCollection = client.db('curehub').collection('payments');
     
-     
 
-  // llammmaaa
-  // app.post('/generate-text', async (req, res) => {
-  //   const { prompt } = req.body;
-  
-  //   try {
-  //     const response = await axios.post('https://api.groq.com/v1/text/generate', {
-  //       prompt: prompt,
-  //       model: 'llama-3.1', // Specify the Llama 3.1 model
-  //       // Include other parameters as needed
-  //     }, {
-  //       headers: {
-  //         'Authorization': `Bearer ${apiKey}`,
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-  
-  //     // Send the generated text back to the client
-  //     res.json(response.data);
-  //   } catch (error) {
-  //     console.error('Error generating text:', error);
-  //     res.status(500).json({ error: 'An error occurred while generating text' });
-  //   }
-  // });
-
-  
   const formatDateTime = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');
@@ -201,6 +172,55 @@ async function run() {
       const users = await userCollection.find().toArray();
       res.send(users);
     })
+
+
+    app.put('/users/membership', async (req, res) => {
+      const { email, plan } = req.body;
+  
+      try {
+          if (!email || !plan) {
+              return res.status(400).send({ message: "Email and Plan are required" });
+          }
+  
+          // Get the current date and calculate start and end dates
+          const moment = require('moment'); // Ensure you import moment
+          const startDate = moment().format("DD-MM-YYYY HH:mm:ss");
+          const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
+  
+          // Update the user with the provided email
+          const updatedUser = await userCollection.findOneAndUpdate(
+              { email }, // Find user by email
+              {
+                  $set: {
+                      plan, // Update the plan
+                      membership: true, // Set membership to true
+                      "membershipDetails.startDate": startDate, // Add start date
+                      "membershipDetails.endDate": endDate, // Add end date
+                  }
+              },
+              { returnDocument: 'after' } // Return the updated document
+          );
+  
+          if (!updatedUser.value) {
+              return res.status(404).send({ message: "User not found" });
+          }
+  
+          res.send({ message: "User updated successfully", user: updatedUser.value });
+  
+          // Schedule a job to disable membership after 1 month
+          setTimeout(async () => {
+              await userCollection.updateOne(
+                  { email },
+                  { $set: { membership: false } }
+              );
+              console.log(`Membership for ${email} has been disabled.`);
+          }, 30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
+      } catch (error) {
+          console.error(error);
+          res.status(500).send({ message: "Internal Server Error" });
+      }
+  });
+  
 
     app.get('/users/:email', async (req, res) => {
       const email = req.params.email;
