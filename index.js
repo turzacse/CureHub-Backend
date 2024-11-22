@@ -201,9 +201,9 @@ async function run() {
               { returnDocument: 'after' } // Return the updated document
           );
   
-          if (!updatedUser.value) {
-              return res.status(404).send({ message: "User not found" });
-          }
+          // if (!updatedUser.value) {
+          //     return res.status(404).send({ message: "User not found" });
+          // }
   
           res.send({ message: "User updated successfully", user: updatedUser.value });
   
