@@ -1083,7 +1083,7 @@ app.get('/payments', async (req, res) => {
 });
 
 
-app.get('/payment/type', async (req, res) => {
+app.get('/payments/type', async (req, res) => {
   try {
       const { type } = req.query; // Retrieve type from query params
 
@@ -1104,7 +1104,7 @@ app.get('/payment/type', async (req, res) => {
   }
 });
 
-app.get('/payment/email', async (req, res) => {
+app.get('/payments/email', async (req, res) => {
   try {
       const { email } = req.query; // Retrieve email from query params
 
@@ -1124,6 +1124,35 @@ app.get('/payment/email', async (req, res) => {
       res.status(500).send({ message: "Internal Server Error" });
   }
 });
+
+
+app.delete('/payments/delete/:id', async (req, res) => {
+  try {
+      const { id } = req.params; // Get ID from URL parameters
+
+      // Validate ID
+      if (!id) {
+          return res.status(400).send({ message: "ID is required" });
+      }
+
+      // Convert string ID to ObjectId
+      const objectId = new ObjectId(id);
+
+      // Attempt to delete the document with the matching ID
+      const result = await PaymentCollection.deleteOne({ _id: objectId });
+
+      if (result.deletedCount === 1) {
+          res.send({ message: "Payment deleted successfully" });
+      } else {
+          res.status(404).send({ message: "Payment not found" });
+      }
+  } catch (error) {
+      // Handle errors
+      console.error(error);
+      res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
 
 
 
