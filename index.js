@@ -960,15 +960,14 @@ async function run() {
 
   // Update Talemedicine 
   app.put('/telemedicine-appointment/:id', async (req, res) => {
-    const { id } = req.params; // Appointment ID from the URL
-    const { doctorId, doctorName, appointmentDate, appointmentTime } = req.body; // Data sent in the request body
-
+    const { id } = req.params; 
+    const { doctorId, doctorName, appointmentDate, appointmentTime } = req.body;
     try {
-        // Find the appointment by ID and update its status and appointment array
+        
         const updatedAppointment = await telemedicineCollection.findOneAndUpdate(
-            { _id: new ObjectId(id) }, // Match the appointment ID
+            { _id: new ObjectId(id) }, 
             {
-                $set: { status: 'Assigned' }, // Update status to 'Assigned'
+                $set: { status: 'Assigned' }, 
                 $push: {
                     appointments: {
                         doctorId,
@@ -976,17 +975,10 @@ async function run() {
                         appointmentDate,
                         appointmentTime,
                     },
-                }, // Add the new appointment details
+                },
             },
-            { returnDocument: 'after', returnOriginal: false } // Return the updated document after modification
+            { returnDocument: 'after', returnOriginal: false }
         );
-
-        // Check if the appointment was found and updated
-        // if (!updatedAppointment.value) {
-        //     return res.status(404).send({ message: 'Appointment not found' });
-        // }
-
-        // Return success response with updated data
         res.status(200).send({
             message: 'Appointment updated successfully',
             updatedAppointment: updatedAppointment.value,
@@ -995,6 +987,26 @@ async function run() {
         console.error('Error updating telemedicine appointment:', error);
         res.status(500).send({ message: 'Internal Server Error' });
     }
+});
+
+app.put('/telemedicine-pay/:id', async (req, res) => {
+  const { id } = req.params; 
+  try {
+      const updatedAppointment = await telemedicineCollection.findOneAndUpdate(
+          { _id: new ObjectId(id) }, 
+          {
+              $set: { status: 'Assigned' }, 
+          },
+          { returnDocument: 'after', returnOriginal: false }
+      );
+      res.status(200).send({
+          message: 'Appointment updated successfully',
+          updatedAppointment: updatedAppointment.value,
+      });
+  } catch (error) {
+      console.error('Error updating telemedicine appointment:', error);
+      res.status(500).send({ message: 'Internal Server Error' });
+  }
 });
 
     app.delete('/telemedicine/delete/:id', async (req, res) => {
