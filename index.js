@@ -116,6 +116,7 @@ async function run() {
     const appointmentCancelCollection = client.db('curehub').collection('appointmentCancelation');
     const appointmentCompleteCollection = client.db('curehub').collection('completeAppointment');
     const ContactCollection = client.db('curehub').collection('contacts');
+    const PaymentCollection = client.db('curehub').collection('payments');
     
      
 
@@ -156,7 +157,6 @@ async function run() {
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 };
   
-
 
     app.post('/analysis-report', async (req, res) => {
       const { userId, responses } = req.body; // Example data structure
@@ -215,13 +215,6 @@ async function run() {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
-
-    // app.post('/users', async (req, res) => {
-    //   const user = req.body;
-    //   console.log(user);
-    //   const result = await userCollection.insertOne(user);
-    //   res.send(result);
-    // })
 
     app.post('/users', async (req, res) => {
       const user = req.body;
@@ -1011,6 +1004,52 @@ async function run() {
     })
     
   });
+
+
+  app.post('/payments', async (req, res) => {
+    const { transactionID, amount, type, email } = req.body;
+
+    try {
+        // Add the createdAt field
+        const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
+
+        // Create the payment object
+        const paymentData = {
+            transactionID,
+            amount,
+            type,
+            email,
+            createdAt
+        };
+
+        // Insert the payment into the database
+        const result = await PaymentCollection.insertOne(paymentData);
+
+        // Send a success response
+        res.send({ message: "Payment added successfully", result });
+    } catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).send({ message: "Internal Server Error" });
+    }
+});
+
+app.get('/payments', async (req, res) => {
+  try {
+      // Fetch all payment records
+      const payments = await PaymentCollection.find().toArray();
+
+      // Send the payment data as a response
+      res.send(payments);
+  } catch (error) {
+      // Handle errors
+      console.error(error);
+      res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+
+
     
 
     // app.post('/jwt', async (req, res) => {
