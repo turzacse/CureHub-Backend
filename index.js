@@ -1007,13 +1007,13 @@ async function run() {
 
 
   app.post('/payments', async (req, res) => {
-    const { transactionID, amount, type, email } = req.body;
+    const { transactionID, amount, type, email, subtype } = req.body;
 
     try {
-        // Add the createdAt field
+        // Get the current timestamp for createdAt
         const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
 
-        // Create the payment object
+        // Prepare the payment data
         const paymentData = {
             transactionID,
             amount,
@@ -1022,10 +1022,22 @@ async function run() {
             createdAt
         };
 
-        // Insert the payment into the database
+        // If the type is 'Member Ship Plan', add the details object
+        if (type === "Member Ship Plan") {
+            const startDate = createdAt;
+            const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
+
+            paymentData.details = {
+                subtype,
+                startDate,
+                endDate
+            };
+        }
+
+        // Insert the payment data into the database
         const result = await PaymentCollection.insertOne(paymentData);
 
-        // Send a success response
+        // Send success response
         res.send({ message: "Payment added successfully", result });
     } catch (error) {
         // Handle errors
@@ -1034,19 +1046,6 @@ async function run() {
     }
 });
 
-// app.get('/payments', async (req, res) => {
-//   try {
-//       // Fetch all payment records
-//       const payments = await PaymentCollection.find().toArray();
-
-//       // Send the payment data as a response
-//       res.send(payments);
-//   } catch (error) {
-//       // Handle errors
-//       console.error(error);
-//       res.status(500).send({ message: "Internal Server Error" });
-//   }
-// });
 
 app.get('/payments', async (req, res) => {
   try {
