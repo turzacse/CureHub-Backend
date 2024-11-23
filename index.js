@@ -1039,8 +1039,71 @@ app.put('/telemedicine-pay/:id', async (req, res) => {
   });
 
 
+  // app.post('/payments', async (req, res) => {
+  //   const { transactionID, amount, type, email, subtype, appointmentId, doctorName } = req.body;
+
+  //   try {
+  //       const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
+
+  //       const paymentData = {
+  //           transactionID,
+  //           amount,
+  //           type,
+  //           email,
+  //           createdAt
+  //       };
+
+  //       if (type == "Membership Plan") {
+  //           const startDate = createdAt;
+  //           const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
+
+  //           paymentData.details = {
+  //               subtype,
+  //               startDate,
+  //               endDate
+  //           };
+  //       }
+  //       else if (type == 'Appointment Booking') {
+  //           paymentData.details = {
+  //             appointmentId,
+  //             doctorName
+  //           };
+  //       }
+  //       else if (type == 'Telemedicine') {
+  //         paymentData.details = {
+  //           appointmentId,
+  //         };
+  //       }
+  //       else if (type == 'Medicine') {
+  //         const { medicines } = req.body; 
+      
+  //         if (Array.isArray(medicines) && medicines.length > 0) {
+  //             paymentData.details = {
+  //                 medicines: medicines.map(item => ({
+  //                     name: item.name,
+  //                     quantity: item.quantity,
+  //                     medicineID: item.medicineID
+  //                 }))
+  //             };
+  //         } else {
+  //             res.status(400).send({ message: "Invalid or missing medicines array" });
+  //             return; 
+  //         }
+  //       }
+      
+  //       const result = await PaymentCollection.insertOne(paymentData);
+
+  //       res.send({ message: "Payment added successfully", result });
+  //   } catch (error) {
+  //       // Handle errors
+  //       console.error(error);
+  //       res.status(500).send({ message: "Internal Server Error" });
+  //   }
+  // });
+
+
   app.post('/payments', async (req, res) => {
-    const { transactionID, amount, type, email, subtype, appointmentId, doctorName } = req.body;
+    const { transactionID, amount, type, email, subtype, appointmentId, doctorName, medicines } = req.body;
 
     try {
         const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
@@ -1062,44 +1125,70 @@ app.put('/telemedicine-pay/:id', async (req, res) => {
                 startDate,
                 endDate
             };
-        }
-        else if (type == 'Appointment Booking') {
+        } else if (type == 'Appointment Booking') {
             paymentData.details = {
-              appointmentId,
-              doctorName
+                appointmentId,
+                doctorName
             };
+        } else if (type == 'Telemedicine') {
+            paymentData.details = {
+                appointmentId,
+            };
+        } else if (type == 'Medicine') {
+            if (Array.isArray(medicines) && medicines.length > 0) {
+                paymentData.details = {
+                    medicines: medicines.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        medicineID: item.medicineID
+                    }))
+                };
+
+                // Update the stock of medicines
+                for (const medicine of medicines) {
+                    const { medicineID, quantity } = medicine;
+
+                    // Find the medicine in the database and update the unit
+                    const medicineDoc = await medicineCollection.findOne({ _id: new ObjectId(medicineID) });
+
+                    if (medicineDoc) {
+                        const updatedUnit = medicineDoc.unit - quantity;
+
+                        // Ensure stock doesn't go negative
+                        if (updatedUnit < 0) {
+                            res.status(400).send({
+                                message: `Insufficient stock for ${medicineDoc.name}. Only ${medicineDoc.unit} units available.`
+                            });
+                            return;
+                        }
+
+                        await medicineCollection.updateOne(
+                            { _id: new ObjectId(medicineID) },
+                            { $set: { unit: updatedUnit } }
+                        );
+                    } else {
+                        res.status(404).send({
+                            message: `Medicine with ID ${medicineID} not found.`
+                        });
+                        return;
+                    }
+                }
+            } else {
+                res.status(400).send({ message: "Invalid or missing medicines array" });
+                return;
+            }
         }
-        else if (type == 'Telemedicine') {
-          paymentData.details = {
-            appointmentId,
-          };
-        }
-        else if (type == 'Medicine') {
-          const { medicines } = req.body; 
-      
-          if (Array.isArray(medicines) && medicines.length > 0) {
-              paymentData.details = {
-                  medicines: medicines.map(item => ({
-                      name: item.name,
-                      quantity: item.quantity,
-                      medicineID: item.medicineID
-                  }))
-              };
-          } else {
-              res.status(400).send({ message: "Invalid or missing medicines array" });
-              return; 
-          }
-        }
-      
+
+        // Save payment data
         const result = await PaymentCollection.insertOne(paymentData);
 
         res.send({ message: "Payment added successfully", result });
     } catch (error) {
-        // Handle errors
-        console.error(error);
+        console.error('Error processing payment:', error);
         res.status(500).send({ message: "Internal Server Error" });
     }
-  });
+});
+
 
 
 app.get('/payments', async (req, res) => {
