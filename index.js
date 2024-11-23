@@ -1038,70 +1038,6 @@ app.put('/telemedicine-pay/:id', async (req, res) => {
     
   });
 
-
-  // app.post('/payments', async (req, res) => {
-  //   const { transactionID, amount, type, email, subtype, appointmentId, doctorName } = req.body;
-
-  //   try {
-  //       const createdAt = moment().format("DD-MM-YYYY HH:mm:ss");
-
-  //       const paymentData = {
-  //           transactionID,
-  //           amount,
-  //           type,
-  //           email,
-  //           createdAt
-  //       };
-
-  //       if (type == "Membership Plan") {
-  //           const startDate = createdAt;
-  //           const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
-
-  //           paymentData.details = {
-  //               subtype,
-  //               startDate,
-  //               endDate
-  //           };
-  //       }
-  //       else if (type == 'Appointment Booking') {
-  //           paymentData.details = {
-  //             appointmentId,
-  //             doctorName
-  //           };
-  //       }
-  //       else if (type == 'Telemedicine') {
-  //         paymentData.details = {
-  //           appointmentId,
-  //         };
-  //       }
-  //       else if (type == 'Medicine') {
-  //         const { medicines } = req.body; 
-      
-  //         if (Array.isArray(medicines) && medicines.length > 0) {
-  //             paymentData.details = {
-  //                 medicines: medicines.map(item => ({
-  //                     name: item.name,
-  //                     quantity: item.quantity,
-  //                     medicineID: item.medicineID
-  //                 }))
-  //             };
-  //         } else {
-  //             res.status(400).send({ message: "Invalid or missing medicines array" });
-  //             return; 
-  //         }
-  //       }
-      
-  //       const result = await PaymentCollection.insertOne(paymentData);
-
-  //       res.send({ message: "Payment added successfully", result });
-  //   } catch (error) {
-  //       // Handle errors
-  //       console.error(error);
-  //       res.status(500).send({ message: "Internal Server Error" });
-  //   }
-  // });
-
-
   app.post('/payments', async (req, res) => {
     const { transactionID, amount, type, email, subtype, appointmentId, doctorName, medicines } = req.body;
 
@@ -1224,6 +1160,30 @@ app.get('/payments/type', async (req, res) => {
       // Handle errors
       console.error(error);
       res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+
+app.get('/payments/medicine', async (req, res) => {
+  try {
+      // Fetch all payments with type 'Medicine'
+      const medicinePayments = await PaymentCollection.find({ type: 'Medicine' }).toArray();
+
+      if (medicinePayments.length === 0) {
+          return res.status(404).send({
+              message: "No payments of type 'Medicine' found."
+          });
+      }
+
+      res.status(200).send({
+          message: "Medicine payments retrieved successfully.",
+          payments: medicinePayments
+      });
+  } catch (error) {
+      console.error('Error fetching medicine payments:', error);
+      res.status(500).send({
+          message: "Internal Server Error"
+      });
   }
 });
 
