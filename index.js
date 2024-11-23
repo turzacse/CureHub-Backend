@@ -1081,7 +1081,8 @@ app.put('/telemedicine-pay/:id', async (req, res) => {
               paymentData.details = {
                   medicines: medicines.map(item => ({
                       name: item.name,
-                      quantity: item.quantity
+                      quantity: item.quantity,
+                      medicineID: item.medicineID
                   }))
               };
           } else {
