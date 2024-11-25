@@ -174,55 +174,6 @@ async function run() {
     })
 
 
-  //   app.put('/users/membership', async (req, res) => {
-  //     const { email, plan } = req.body;
-  
-  //     try {
-  //         if (!email || !plan) {
-  //             return res.status(400).send({ message: "Email and Plan are required" });
-  //         }
-  
-  //         // Get the current date and calculate start and end dates
-  //         // const moment = require('moment'); // Ensure you import moment
-  //         const startDate = moment().format("DD-MM-YYYY HH:mm:ss");
-  //         const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
-  
-  //         // Update the user with the provided email
-  //         const updatedUser = await userCollection.findOneAndUpdate(
-  //             { email }, // Find user by email
-  //             {
-  //                 $set: {
-  //                     plan, // Update the plan
-  //                     membership: true, // Set membership to true
-  //                     "membershipDetails.startDate": startDate, // Add start date
-  //                     "membershipDetails.endDate": endDate, // Add end date
-  //                 }
-  //             },
-  //             { returnDocument: 'after' } // Return the updated document
-  //         );
-  
-  //         // if (!updatedUser.value) {
-  //         //     return res.status(404).send({ message: "User not found" });
-  //         // }
-  
-  //         res.send({ message: "User updated successfully", user: updatedUser.value });
-  
-  //         // Schedule a job to disable membership after 1 month
-  //         setTimeout(async () => {
-  //             await userCollection.updateOne(
-  //                 { email },
-  //                 { $set: { membership: false } }
-  //             );
-  //             console.log(`Membership for ${email} has been disabled.`);
-  //         }, 30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
-  //     } catch (error) {
-  //         console.error(error);
-  //         res.status(500).send({ message: "Internal Server Error" });
-  //     }
-  // });
-  
-  
-
 app.put('/users/membership', async (req, res) => {
     const { email, plan } = req.body;
 
@@ -339,8 +290,6 @@ app.put('/users/membership', async (req, res) => {
 
 
     //medicine related API
-   
-   
     app.get('/medicine', async (req, res) => {
       console.log(req.body);
       console.log('owener info: ', req.user);
@@ -1111,16 +1060,56 @@ app.put('/telemedicine-pay/:id', async (req, res) => {
                 startDate,
                 endDate
             };
-        } else if (type == 'Appointment Booking') {
+        } 
+        // else if (type == 'Appointment Booking') {
+        //     paymentData.details = {
+        //         appointmentId,
+        //         doctorName
+        //     };
+        // } 
+        else if (type == 'Appointment Booking') {
+          paymentData.details = {
+              appointmentId,
+              doctorName
+          };
+      
+          // Update the appointment status to "Paid"
+          const appointment = await appoinmentCollection.findOne({ _id: new ObjectId(appointmentId) });
+      
+          if (!appointment) {
+              res.status(404).send({
+                  message: `Appointment with ID ${appointmentId} not found.`
+              });
+              return;
+          }
+      
+          if (appointment.status === "Paid") {
+              res.status(400).send({
+                  message: `Appointment with ID ${appointmentId} is already paid.`
+              });
+              return;
+          }
+      
+          // Update the status to "Paid"
+          const updateResult = await appoinmentCollection.updateOne(
+              { _id: new ObjectId(appointmentId) },
+              { $set: { status: "Paid" } }
+          );
+      
+          if (updateResult.modifiedCount === 0) {
+              res.status(500).send({
+                  message: `Failed to update status for appointment with ID ${appointmentId}.`
+              });
+              return;
+          }
+      }
+      
+        else if (type == 'Telemedicine') {
             paymentData.details = {
                 appointmentId,
-                doctorName
             };
-        } else if (type == 'Telemedicine') {
-            paymentData.details = {
-                appointmentId,
-            };
-        } else if (type == 'Medicine') {
+        } 
+        else if (type == 'Medicine') {
             if (Array.isArray(medicines) && medicines.length > 0) {
                 paymentData.details = {
                     medicines: medicines.map(item => ({
