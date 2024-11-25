@@ -174,53 +174,103 @@ async function run() {
     })
 
 
-    app.put('/users/membership', async (req, res) => {
-      const { email, plan } = req.body;
+  //   app.put('/users/membership', async (req, res) => {
+  //     const { email, plan } = req.body;
   
-      try {
-          if (!email || !plan) {
-              return res.status(400).send({ message: "Email and Plan are required" });
-          }
+  //     try {
+  //         if (!email || !plan) {
+  //             return res.status(400).send({ message: "Email and Plan are required" });
+  //         }
   
-          // Get the current date and calculate start and end dates
-          // const moment = require('moment'); // Ensure you import moment
-          const startDate = moment().format("DD-MM-YYYY HH:mm:ss");
-          const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
+  //         // Get the current date and calculate start and end dates
+  //         // const moment = require('moment'); // Ensure you import moment
+  //         const startDate = moment().format("DD-MM-YYYY HH:mm:ss");
+  //         const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
   
-          // Update the user with the provided email
-          const updatedUser = await userCollection.findOneAndUpdate(
-              { email }, // Find user by email
-              {
-                  $set: {
-                      plan, // Update the plan
-                      membership: true, // Set membership to true
-                      "membershipDetails.startDate": startDate, // Add start date
-                      "membershipDetails.endDate": endDate, // Add end date
-                  }
-              },
-              { returnDocument: 'after' } // Return the updated document
-          );
+  //         // Update the user with the provided email
+  //         const updatedUser = await userCollection.findOneAndUpdate(
+  //             { email }, // Find user by email
+  //             {
+  //                 $set: {
+  //                     plan, // Update the plan
+  //                     membership: true, // Set membership to true
+  //                     "membershipDetails.startDate": startDate, // Add start date
+  //                     "membershipDetails.endDate": endDate, // Add end date
+  //                 }
+  //             },
+  //             { returnDocument: 'after' } // Return the updated document
+  //         );
   
-          // if (!updatedUser.value) {
-          //     return res.status(404).send({ message: "User not found" });
-          // }
+  //         // if (!updatedUser.value) {
+  //         //     return res.status(404).send({ message: "User not found" });
+  //         // }
   
-          res.send({ message: "User updated successfully", user: updatedUser.value });
+  //         res.send({ message: "User updated successfully", user: updatedUser.value });
   
-          // Schedule a job to disable membership after 1 month
-          setTimeout(async () => {
-              await userCollection.updateOne(
-                  { email },
-                  { $set: { membership: false } }
-              );
-              console.log(`Membership for ${email} has been disabled.`);
-          }, 30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
-      } catch (error) {
-          console.error(error);
-          res.status(500).send({ message: "Internal Server Error" });
-      }
-  });
+  //         // Schedule a job to disable membership after 1 month
+  //         setTimeout(async () => {
+  //             await userCollection.updateOne(
+  //                 { email },
+  //                 { $set: { membership: false } }
+  //             );
+  //             console.log(`Membership for ${email} has been disabled.`);
+  //         }, 30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
+  //     } catch (error) {
+  //         console.error(error);
+  //         res.status(500).send({ message: "Internal Server Error" });
+  //     }
+  // });
   
+  const moment = require('moment'); // Ensure moment is imported
+
+app.put('/users/membership', async (req, res) => {
+    const { email, plan } = req.body;
+
+    try {
+        if (!email || !plan) {
+            return res.status(400).send({ message: "Email and Plan are required" });
+        }
+
+        // Get the current date and calculate start and end dates
+        const startDate = moment().format("DD-MM-YYYY HH:mm:ss");
+        const endDate = moment().add(1, 'months').format("DD-MM-YYYY HH:mm:ss");
+
+        // Update the user with the provided email
+        const updatedUser = await userCollection.findOneAndUpdate(
+            { email }, // Find user by email
+            {
+                $set: {
+                    plan, // Update the plan
+                    membership: true, // Always set membership to true
+                    "membershipDetails.startDate": startDate, // Update start date
+                    "membershipDetails.endDate": endDate, // Update end date
+                }
+            },
+            { returnDocument: 'after' } // Return the updated document
+        );
+
+        if (!updatedUser.value) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        res.send({ message: "User updated successfully", user: updatedUser.value });
+
+        // Schedule a job to disable membership after 1 month
+        setTimeout(async () => {
+            const result = await userCollection.updateOne(
+                { email },
+                { $set: { membership: false } }
+            );
+            if (result.modifiedCount > 0) {
+                console.log(`Membership for ${email} has been disabled.`);
+            }
+        }, 30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Internal Server Error" });
+    }
+});
+
 
     app.get('/users/:email', async (req, res) => {
       const email = req.params.email;
