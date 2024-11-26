@@ -842,9 +842,9 @@ app.put('/users/membership', async (req, res) => {
         const id = req.params.id; // Get the _id from the URL params
         const { prescription } = req.body; // Extract the prescription object from the request body
 
-        if (!prescription || typeof prescription !== 'object') {
-            return res.status(400).send({ error: "Invalid prescription object" });
-        }
+        // if (!prescription || typeof prescription !== 'object') {
+        //     return res.status(400).send({ error: "Invalid prescription object" });
+        // }
 
         const result = await appointmentCompleteCollection.updateOne(
             { _id: new ObjectId(id) }, // Match the document by _id
