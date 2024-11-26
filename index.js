@@ -857,12 +857,50 @@ app.put('/users/membership', async (req, res) => {
     }
 });
 
-  app.post('/complete/appoinment', async (req, res) => {
-    const complete = req.body;
-    console.log(complete);
-    const result = await appointmentCompleteCollection.insertOne(complete);
-    res.send(result);
-  })
+  // app.post('/complete/appoinment', async (req, res) => {
+  //   const complete = req.body;
+  //   console.log(complete);
+  //   const result = await appointmentCompleteCollection.insertOne(complete);
+  //   res.send(result);
+  // })
+  app.post('/complete/appointment', async (req, res) => {
+    const { appointment_id } = req.body; // Extract appointment_id from the request body
+  
+    try {
+      // Step 1: Find the appointment by ID
+      const appointment = await appoinmentCollection.findOne({ _id: new ObjectId(appointment_id) });
+  
+      if (!appointment) {
+        return res.status(404).send({ message: 'Appointment not found' }); // Return if appointment not found
+      }
+  
+      // Step 2: Check if the status is 'Paid'
+      if (appointment.status !== 'Paid') {
+        return res.status(400).send({ message: 'Appointment status is not Paid' });
+      }
+  
+      // Step 3: Update the appointment status to 'Complete'
+      const updateResult = await appoinmentCollection.updateOne(
+        { _id: new ObjectId(appointment_id) }, // Find by appointment_id
+        { $set: { status: 'Complete' } } // Update status to 'Complete'
+      );
+  
+      // Step 4: Insert the complete data into appointmentCompleteCollection
+      const insertResult = await appointmentCompleteCollection.insertOne(req.body);
+  
+      // Send success response
+      res.send({
+        message: 'Appointment completed successfully',
+        updateResult,
+        insertResult,
+      });
+    } catch (error) {
+      console.error('Error completing appointment:', error);
+      res.status(500).send({ message: 'Failed to complete appointment', error });
+    }
+  });
+  
+
   app.delete('/complete/delete-all', async (req, res) => {
     try {
         // Delete all documents from the collection
