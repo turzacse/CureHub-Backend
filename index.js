@@ -996,6 +996,27 @@ app.put('/users/membership', async (req, res) => {
           res.status(500).send({ message: 'Internal Server Error' });
       }
   });  
+
+  // get by doctorID 
+  app.get('/telemedicine-appointment/:doctorId', async (req, res) => {
+    try {
+        // Get the doctorId from route parameters
+        const { doctorId } = req.params;
+
+        // Filter the appointments by doctorId
+        const telemedicineAppointments = await telemedicineCollection.find({ 'appointments.doctorId': doctorId }).toArray();
+
+        if (telemedicineAppointments.length > 0) {
+            res.status(200).send(telemedicineAppointments);
+        } else {
+            res.status(404).send({ message: 'No telemedicine appointments found for this doctor' });
+        }
+    } catch (error) {
+        console.error('Error fetching telemedicine appointments:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+
     // app.post('/telemedicine-appoinment', async (req, res) => {
     //   const telemedicine = req.body;
     //   console.log(telemedicine);
