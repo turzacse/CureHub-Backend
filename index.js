@@ -836,6 +836,37 @@ app.put('/users/membership', async (req, res) => {
     res.send(complete);
   })
 
+
+  app.put('/complete/update/prescription/:id', async (req, res) => {
+    try {
+        const id = req.params.id; // Get the _id from the URL params
+        const { prescription } = req.body; // Extract the prescription object from the request body
+
+        if (!prescription || typeof prescription !== 'object') {
+            return res.status(400).send({ error: "Invalid prescription object" });
+        }
+
+        const result = await appointmentCompleteCollection.updateOne(
+            { _id: new ObjectId(id) }, // Match the document by _id
+            { $set: { prescription: prescription } } // Update the prescription field
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).send({ error: "Appointment not found" });
+        }
+
+        res.send({
+            success: true,
+            message: "Prescription updated successfully",
+            result: result,
+        });
+    } catch (error) {
+        console.error("Error updating prescription:", error);
+        res.status(500).send({ error: "Failed to update prescription" });
+    }
+});
+
+
   app.get('/complete/appointment/:cureHubUser', async (req, res) => {
     const cureHubUser = req.params.cureHubUser;
     console.log(`Received request for cureHubUser: ${cureHubUser}`);
