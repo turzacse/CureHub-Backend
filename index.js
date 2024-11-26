@@ -875,9 +875,9 @@ app.put('/users/membership', async (req, res) => {
       }
   
       // Step 2: Check if the status is 'Paid'
-      if (appointment.status !== 'Paid') {
-        return res.status(400).send({ message: 'Appointment status is not Paid' });
-      }
+      // if (appointment.status !== 'Paid') {
+      //   return res.status(400).send({ message: 'Appointment status is not Paid' });
+      // }
   
       // Step 3: Update the appointment status to 'Complete'
       const updateResult = await appoinmentCollection.updateOne(
