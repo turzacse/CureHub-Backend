@@ -978,7 +978,7 @@ app.put('/users/membership', async (req, res) => {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     });
-    app.get('/telemedicine-appointment/:cureHubUser', async (req, res) => {
+    app.get('/telemedicine-appointment/cureHub/:cureHubUser', async (req, res) => {
       const { cureHubUser } = req.params;
       console.log(`Received request for cureHubUser: ${cureHubUser}`);
       try {
@@ -998,7 +998,7 @@ app.put('/users/membership', async (req, res) => {
   });  
 
   // get by doctorID 
-  app.get('/telemedicine-appointment/:doctorId', async (req, res) => {
+  app.get('/telemedicine-appointment/doctor/:doctorId', async (req, res) => {
     try {
         // Get the doctorId from route parameters
         const { doctorId } = req.params;
