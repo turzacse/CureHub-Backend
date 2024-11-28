@@ -1101,9 +1101,9 @@ app.put('/users/membership', async (req, res) => {
           { returnDocument: 'after', returnOriginal: false } 
       );
 
-      if (!updatedAppointment.value) {
-          return res.status(404).send({ message: 'Appointment not found' });
-      }
+      // if (!updatedAppointment.value) {
+      //     return res.status(404).send({ message: 'Appointment not found' });
+      // }
 
       res.status(200).send({
           message: 'Appointment updated successfully',
