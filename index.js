@@ -1087,6 +1087,35 @@ app.put('/users/membership', async (req, res) => {
     }
 });
 
+
+ // complete the telemedicine Appointmnet
+ app.put('/telemedicine-appointment/complete/:id', async (req, res) => {
+  const { id } = req.params; 
+  try {
+      const updatedAppointment = await telemedicineCollection.findOneAndUpdate(
+          { _id: new ObjectId(id) }, 
+          {
+              $unset: { meetLink: "" }, 
+              $set: { status: 'Completed' }, 
+          },
+          { returnDocument: 'after', returnOriginal: false } 
+      );
+
+      if (!updatedAppointment.value) {
+          return res.status(404).send({ message: 'Appointment not found' });
+      }
+
+      res.status(200).send({
+          message: 'Appointment updated successfully',
+          updatedAppointment: updatedAppointment.value,
+      });
+  } catch (error) {
+      console.error('Error completing telemedicine appointment:', error);
+      res.status(500).send({ message: 'Internal Server Error' });
+  }
+});
+
+
 app.put('/telemedicine-pay/:id', async (req, res) => {
   const { id } = req.params; 
   try {
