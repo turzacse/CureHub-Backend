@@ -1016,27 +1016,13 @@ app.put('/users/membership', async (req, res) => {
         res.status(500).send({ message: 'Internal Server Error' });
     }
 });
-
-    // app.post('/telemedicine-appoinment', async (req, res) => {
-    //   const telemedicine = req.body;
-    //   console.log(telemedicine);
-    //   const result = await telemedicineCollection.insertOne(telemedicine);
-    //   res.send(result);
-    // })
     app.post('/telemedicine-appointment', async (req, res) => {
       try {
-          // Extract telemedicine data from the request body
           const telemedicine = req.body;
-  
-          // Add initial status as "Not Assigned"
           telemedicine.status = "Not Paid";
   
           console.log(telemedicine);
-  
-          // Insert the telemedicine data into the collection
           const result = await telemedicineCollection.insertOne(telemedicine);
-  
-          // Send the result back to the client
           res.status(201).send({
               message: "Telemedicine appointment created successfully",
               result,
@@ -1047,7 +1033,7 @@ app.put('/users/membership', async (req, res) => {
       }
   });
 
-  // Update Talemedicine 
+  // Update Talemedicine By Assigned doctor 
   app.put('/telemedicine-appointment/:id', async (req, res) => {
     const { id } = req.params; 
     const { doctorId, doctorName, appointmentDate, appointmentTime } = req.body;
@@ -1065,6 +1051,29 @@ app.put('/users/membership', async (req, res) => {
                         appointmentTime,
                     },
                 },
+            },
+            { returnDocument: 'after', returnOriginal: false }
+        );
+        res.status(200).send({
+            message: 'Appointment updated successfully',
+            updatedAppointment: updatedAppointment.value,
+        });
+    } catch (error) {
+        console.error('Error updating telemedicine appointment:', error);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
+  
+  // update telemedicine by Set meet link 
+  app.put('/telemedicine-appointment/meet/:id', async (req, res) => {
+    const { id } = req.params; 
+    const { meetLink } = req.body;
+    try {
+        
+        const updatedAppointment = await telemedicineCollection.findOneAndUpdate(
+            { _id: new ObjectId(id) }, 
+            {
+                $set: { meetLink: meetLink }, 
             },
             { returnDocument: 'after', returnOriginal: false }
         );
