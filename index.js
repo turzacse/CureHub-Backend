@@ -114,6 +114,7 @@ async function run() {
     const appointmentCompleteCollection = client.db('curehub').collection('completeAppointment');
     const ContactCollection = client.db('curehub').collection('contacts');
     const PaymentCollection = client.db('curehub').collection('payments');
+    const MentalHealthCollection = client.db('curehub').collection('MentalHealth');
     
 
   const formatDateTime = () => {
@@ -166,7 +167,7 @@ async function run() {
         res.status(500).send({ message: 'Failed to generate or save report' });
       }
     });
-
+   
     // user related api 
     app.get('/users', async (req, res) => {
       const users = await userCollection.find().toArray();
@@ -1388,7 +1389,12 @@ app.delete('/payments/delete/:id', async (req, res) => {
   }
 });
 
+ // ********** MEantal Health **********///
 
+ app.get('/mental-health/analysis/result', async (req, res) => {
+  const analysis = await MentalHealthCollection.find().toArray();
+  res.send(analysis);
+})
 
 
 
