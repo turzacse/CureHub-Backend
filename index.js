@@ -839,16 +839,13 @@ app.put('/users/membership', async (req, res) => {
 
   app.put('/complete/update/prescription/:id', async (req, res) => {
     try {
-        const id = req.params.id; // Get the _id from the URL params
-        const { prescription } = req.body; // Extract the prescription object from the request body
-
-        // if (!prescription || typeof prescription !== 'object') {
-        //     return res.status(400).send({ error: "Invalid prescription object" });
-        // }
+        const id = req.params.id; 
+        const { prescription } = req.body; 
 
         const result = await appointmentCompleteCollection.updateOne(
-            { _id: new ObjectId(id) }, // Match the document by _id
-            { $set: { prescription: prescription } } // Update the prescription field
+            { _id: new ObjectId(id) }, 
+            { $set: { prescription: prescription } },
+            { $set: { status: 'Prescribed' } } 
         );
 
         if (result.matchedCount === 0) {
@@ -888,12 +885,7 @@ app.put('/users/membership', async (req, res) => {
     }
 });
 
-  // app.post('/complete/appoinment', async (req, res) => {
-  //   const complete = req.body;
-  //   console.log(complete);
-  //   const result = await appointmentCompleteCollection.insertOne(complete);
-  //   res.send(result);
-  // })
+
   app.post('/complete/appointment', async (req, res) => {
     const { appointment_id } = req.body; // Extract appointment_id from the request body
   
@@ -904,13 +896,6 @@ app.put('/users/membership', async (req, res) => {
       if (!appointment) {
         return res.status(404).send({ message: 'Appointment not found' }); // Return if appointment not found
       }
-  
-      // Step 2: Check if the status is 'Paid'
-      // if (appointment.status !== 'Paid') {
-      //   return res.status(400).send({ message: 'Appointment status is not Paid' });
-      // }
-  
-      // Step 3: Update the appointment status to 'Complete'
       const updateResult = await appoinmentCollection.updateOne(
         { _id: new ObjectId(appointment_id) }, // Find by appointment_id
         { $set: { status: 'Complete' } } // Update status to 'Complete'
