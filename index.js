@@ -636,6 +636,24 @@ app.put('/users/membership', async (req, res) => {
           res.status(500).send({ message: 'An error occurred while updating the doctor', error });
       }
   });
+
+app.delete('/doctors/deleteOne/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const result = await doctorsCollection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 1) {
+            res.send({ success: true, message: 'Doctor deleted successfully.' });
+        } else {
+            res.status(404).send({ success: false, message: 'Doctor not found.' });
+        }
+    } catch (error) {
+        console.error('Error deleting doctor:', error);
+        res.status(500).send({ success: false, message: 'An error occurred while deleting the doctor.' });
+    }
+});
+
   
     app.delete('/doctors/delete-all', async (req, res) => {
       try {
