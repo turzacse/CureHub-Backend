@@ -1337,7 +1337,6 @@ app.get('/payments/type', async (req, res) => {
 
 app.get('/payments/medicine', async (req, res) => {
   try {
-      // Fetch all payments with type 'Medicine'
       const medicinePayments = await PaymentCollection.find({ type: 'Medicine' }).toArray();
 
       if (medicinePayments.length === 0) {
@@ -1357,6 +1356,38 @@ app.get('/payments/medicine', async (req, res) => {
       });
   }
 });
+
+// delivert the Medicine to the User 
+app.put('/payments/medicine/:id', async (req, res) => {
+  try {
+      const { id } = req.params; // Get the ID from the request parameters
+
+      // Update the document with the given ID and type 'Medicine'
+      const result = await PaymentCollection.updateOne(
+          { _id: new ObjectId(id), type: 'Medicine' }, // Filter by ID and type
+          { $set: { Status: 'Success' } } // Update the Status field
+      );
+
+      // If no document was found with the provided ID
+      if (result.matchedCount === 0) {
+          return res.status(404).send({
+              message: `No payment found with ID: ${id} and type 'Medicine'.`
+          });
+      }
+
+      // If the document was updated successfully
+      res.status(200).send({
+          message: `Payment with ID: ${id} updated successfully.`,
+          updatedCount: result.modifiedCount
+      });
+  } catch (error) {
+      console.error('Error updating payment:', error);
+      res.status(500).send({
+          message: "Internal Server Error"
+      });
+  }
+});
+
 
 app.get('/payments/email', async (req, res) => {
   try {
