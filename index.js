@@ -1445,57 +1445,77 @@ app.delete('/payments/delete/:id', async (req, res) => {
   res.send(analysis);
 })
 
-
-
-app.post('/mental-health/analysis/result', async (req, res) => {
+app.post('/mental-health/analysis/result/output', async (req, res) => {
   try {
-      // Destructure the data sent in the request body
-      const {
-          Gender,
-          Diagnosis,
-          "Symptom Severity (1-10)": symptomSeverity,
-          "Mood Score (1-10)": moodScore,
-          "Sleep Quality (1-10)": sleepQuality,
-          "Physical Activity (hrs/week)": physicalActivity,
-          Medication,
-          "Therapy Type": therapyType,
-          "Treatment Duration (weeks)": treatmentDuration,
-          "Stress Level (1-10)": stressLevel,
-          Outcome,
-          "Treatment Progress (1-10)": treatmentProgress
-      } = req.body;
+    // Log the received data for debugging
+    console.log("Request Body:", req.body);
 
-      // Dynamically build the query object
-      const query = {};
-      if (Gender) query["Gender"] = Gender;
-      if (Diagnosis) query["Diagnosis"] = Diagnosis;
-      if (symptomSeverity) query["Symptom Severity (1-10)"] = parseInt(symptomSeverity);
-      if (moodScore) query["Mood Score (1-10)"] = parseInt(moodScore);
-      if (sleepQuality) query["Sleep Quality (1-10)"] = parseInt(sleepQuality);
-      if (physicalActivity) query["Physical Activity (hrs/week)"] = parseInt(physicalActivity);
-      if (Medication) query["Medication"] = Medication;
-      if (therapyType) query["Therapy Type"] = therapyType;
-      if (treatmentDuration) query["Treatment Duration (weeks)"] = parseInt(treatmentDuration);
-      if (stressLevel) query["Stress Level (1-10)"] = parseInt(stressLevel);
-      if (Outcome) query["Outcome"] = Outcome;
-      if (treatmentProgress) query["Treatment Progress (1-10)"] = parseInt(treatmentProgress);
+    // Destructure the data sent in the request body
+    const {
+      Gender,
+      Diagnosis,
+      "Symptom Severity (1-10)": symptomSeverity,
+      "Mood Score (1-10)": moodScore,
+      "Sleep Quality (1-10)": sleepQuality,
+      "Physical Activity (hrs/week)": physicalActivity,
+      Medication,
+      "Therapy Type": therapyType,
+      "Treatment Duration (weeks)": treatmentDuration,
+      "Stress Level (1-10)": stressLevel,
+      Outcome,
+      "Treatment Progress (1-10)": treatmentProgress,
+    } = req.body;
 
-      // Fetch matching data from the database
-      const analysis = await MentalHealthCollection.find(query).toArray();
+    // Log destructured variables for debugging
+    console.log("Destructured Data:", {
+      Gender,
+      Diagnosis,
+      symptomSeverity,
+      moodScore,
+      sleepQuality,
+      physicalActivity,
+      Medication,
+      therapyType,
+      treatmentDuration,
+      stressLevel,
+      Outcome,
+      treatmentProgress,
+    });
 
-      // Send the matching data back to the frontend
-      res.send(analysis);
+    // Dynamically build the query object
+    const query = {};
+    if (Gender) query["Gender"] = Gender;
+    if (Diagnosis) query["Diagnosis"] = Diagnosis;
+    if (symptomSeverity) query["Symptom Severity (1-10)"] = parseInt(symptomSeverity);
+    if (moodScore) query["Mood Score (1-10)"] = parseInt(moodScore);
+    if (sleepQuality) query["Sleep Quality (1-10)"] = parseInt(sleepQuality);
+    if (physicalActivity) query["Physical Activity (hrs/week)"] = parseInt(physicalActivity);
+    if (Medication) query["Medication"] = Medication;
+    if (therapyType) query["Therapy Type"] = therapyType;
+    if (treatmentDuration) query["Treatment Duration (weeks)"] = parseInt(treatmentDuration);
+    if (stressLevel) query["Stress Level (1-10)"] = parseInt(stressLevel);
+    if (Outcome) query["Outcome"] = Outcome;
+    if (treatmentProgress) query["Treatment Progress (1-10)"] = parseInt(treatmentProgress);
+
+    // Log the query object for debugging
+    console.log("Query Object:", query);
+
+    // Fetch matching data from the database
+    const analysis = await MentalHealthCollection.find(query).toArray();
+
+    // Check if any data was found
+    if (analysis.length === 0) {
+      console.log("No matching data found.");
+      return res.status(404).send({ message: "No matching data found." });
+    }
+
+    // Send the matching data back to the frontend
+    res.send(analysis);
   } catch (error) {
-      console.error("Error fetching mental health analysis data:", error);
-      res.status(500).send({ message: "Internal Server Error" });
+    console.error("Error fetching mental health analysis data:", error);
+    res.status(500).send({ message: "Internal Server Error" });
   }
 });
-
-
-
-
-
-    
 
     // app.post('/jwt', async (req, res) => {
     //   const logged = req.body;
