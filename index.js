@@ -1504,9 +1504,14 @@ app.post('/mental-health/analysis/result/output', async (req, res) => {
     const analysis = await MentalHealthCollection.find(query).toArray();
 
     // Check if any data was found
+    // if (analysis.length === 0) {
+    //   console.log("No matching data found.");
+    //   return res.status(404).send({ message: "No matching data found." });
+    // }
     if (analysis.length === 0) {
       console.log("No matching data found.");
-      return res.status(404).send({ message: "No matching data found." });
+      // Instead of error, send default response
+      return res.send({ "AI Detection Result": "Neutral" });
     }
 
     // Send the matching data back to the frontend
