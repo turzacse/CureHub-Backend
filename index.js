@@ -1511,7 +1511,7 @@ app.post('/mental-health/analysis/result/output', async (req, res) => {
     if (analysis.length === 0) {
       console.log("No matching data found.");
       // Instead of error, send default response
-      return res.send({ "AI Detection Result": "Neutral" });
+      return res.send({ "AI": "Neutral" });
     }
 
     // Send the matching data back to the frontend
